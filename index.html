@@ -1,0 +1,2022 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8" />
+<title>PG Multi Crawler</title>
+
+<style>
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: #0b1220;
+  color: #e8eef7;
+  font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  line-height: 1.35;
+}
+
+.app {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  gap: 8px;
+}
+
+.topbar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  background: #141c2b;
+  border: 1px solid #243044;
+  border-radius: 10px;
+}
+
+.brand {
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  padding: 0 6px;
+}
+
+.status {
+  margin: 0;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #102033;
+  border: 1px solid #243044;
+  color: #86efac;
+  font-size: 12px;
+  white-space: nowrap;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-left: auto;
+  align-items: center;
+}
+
+.actions .sep {
+  width: 1px;
+  height: 22px;
+  background: #2b3a52;
+  margin: 0 2px;
+}
+
+.dir-row {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dir-row input { flex: 1; }
+.dir-row label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #cbd5e1;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.workspace {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.col {
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.panel {
+  background: #141c2b;
+  border: 1px solid #243044;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.panel-title {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.panel-desc, .label, .hint {
+  margin: 0 0 4px;
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.hint { margin-top: 4px; }
+
+.field { min-width: 0; }
+.field + .field { margin-top: 8px; }
+.stack > * + * { margin-top: 8px; }
+
+.url-item {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.url-item:last-child { margin-bottom: 0; }
+.url-input { flex: 1; }
+.pickme-point-item input { flex: 1; }
+
+input, select, textarea {
+  width: 100%;
+  background: #0d1524;
+  border: 1px solid #2b3a52;
+  color: #f8fafc;
+  padding: 6px 8px;
+  border-radius: 6px;
+  outline: none;
+  font-size: 12px;
+}
+
+input:focus, select:focus, textarea:focus { border-color: #3b82f6; }
+input[readonly] { color: #cbd5e1; }
+select { height: 32px; }
+
+button {
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+button:hover { filter: brightness(1.08); }
+
+.add-btn, .remove-btn {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  font-size: 18px;
+  color: #fff;
+}
+
+.add-btn { background: #16a34a; }
+.remove-btn { background: #dc2626; }
+
+.main-btn { background: #2563eb; color: #fff; padding: 6px 10px; }
+.stop-btn { background: #dc2626; color: #fff; }
+.click-btn { background: #d97706; color: #fff; }
+.ghost-btn { background: #334155; color: #e2e8f0; padding: 6px 10px; }
+.smart-btn {
+  background: #4f46e5;
+  color: #fff;
+  padding: 5px 8px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 6px 8px;
+}
+
+.inline-opts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-top: 8px;
+  font-size: 12px;
+}
+
+.inline-opts label,
+.choice {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  color: #e2e8f0;
+}
+
+.inline-opts input,
+.choice input,
+.dir-row input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  accent-color: #3b82f6;
+}
+
+.log {
+  flex-shrink: 0;
+  height: 132px;
+  margin: 0;
+  background: #070d18;
+  border: 1px solid #243044;
+  border-radius: 8px;
+  overflow: auto;
+  padding: 8px 10px;
+  font-size: 11px;
+  line-height: 1.45;
+  font-family: Consolas, "Cascadia Mono", monospace;
+  color: #cbd5e1;
+}
+
+.option-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.mode-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 3px;
+  margin: 0 0 8px;
+  background: #0d1524;
+  border: 1px solid #2b3a52;
+  border-radius: 8px;
+}
+
+.mode-switch.mode-switch-3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.mode-switch > label { display: block; margin: 0; cursor: pointer; position: relative; }
+.mode-switch input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.mode-card {
+  padding: 6px 8px;
+  border-radius: 6px;
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.mode-card-desc { display: none; }
+.mode-card:hover { background: rgba(59, 130, 246, .1); color: #e2e8f0; }
+.mode-switch input:checked + .mode-card {
+  background: #1d4ed8;
+  color: #fff;
+}
+
+h3 { margin: 0 0 6px; font-size: 13px; font-weight: 700; }
+
+.image-step-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 6px 0;
+  max-height: 180px;
+  overflow: auto;
+}
+
+.image-step-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  background: #0d1524;
+  border: 1px solid #2b3a52;
+  border-radius: 8px;
+}
+
+.step-index {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.step-preview {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  background: #070d18;
+  border: 1px solid #2b3a52;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.step-info { flex: 1; min-width: 0; }
+.step-name, .step-placeholder { font-size: 11px; word-break: break-all; }
+.step-placeholder { color: #64748b; }
+
+.pick-btn { background: #4f46e5; color: #fff; padding: 5px 8px; white-space: nowrap; }
+
+.add-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 2px 0 8px;
+}
+
+.add-step .label { margin: 0; }
+
+.modal-mask {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(2, 6, 23, .72);
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.modal-mask.open { display: flex; }
+
+.modal-panel {
+  width: min(640px, 100%);
+  background: #141c2b;
+  border: 1px solid #243044;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.modal-title { margin: 0 0 6px; font-size: 16px; font-weight: 700; }
+.modal-desc { margin: 0 0 10px; font-size: 12px; color: #94a3b8; }
+.modal-panel textarea { min-height: 180px; resize: vertical; font-family: Consolas, Monaco, monospace; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px; }
+
+.download-win-list {
+  max-height: 260px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.download-win-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px;
+  background: #0d1524;
+  border: 1px solid #2b3a52;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.download-win-item input { margin-top: 2px; }
+.download-win-item .win-url {
+  color: #94a3b8;
+  word-break: break-all;
+  font-size: 11px;
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.section-head .label { margin: 0; color: #cbd5e1; }
+.toolbar { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.link-tool-list {
+  margin-top: 8px;
+  max-height: 180px;
+  overflow: auto;
+}
+
+.link-tool-item {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.link-tool-item:last-child { margin-bottom: 0; }
+.link-tool-item input { flex: 1; }
+
+@media (max-width: 900px) {
+  body, html { overflow: auto; height: auto; }
+  .app { height: auto; }
+  .workspace { grid-template-columns: 1fr; }
+  .actions { margin-left: 0; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <div class="topbar">
+    <div class="brand">PG 抓取</div>
+    <div class="status" id="status">状态：等待中</div>
+    <div class="actions">
+      <button class="main-btn" id="select">选择目录</button>
+      <button class="main-btn" id="start">开始抓取</button>
+      <span class="sep"></span>
+      <button class="main-btn click-btn" id="startClick">启用点击</button>
+      <button class="main-btn stop-btn" id="stopClick">停止点击</button>
+      <span class="sep"></span>
+      <button class="main-btn click-btn" id="startImageFlow">开始识别</button>
+      <button class="main-btn stop-btn" id="stopImageFlow">停止识别</button>
+      <button class="main-btn" id="captureShot" style="background:#4f46e5;">截图</button>
+      <button class="main-btn" id="downloadResources" style="background:#0f766e;">下载资源</button>
+      <span class="sep"></span>
+      <button class="main-btn stop-btn" id="closeAllWindow">关窗口</button>
+    </div>
+  </div>
+
+  <div class="dir-row">
+    <input id="dir" readonly placeholder="保存目录" />
+    <label>
+      <input type="checkbox" id="splitByWindow" checked />
+      分窗口存储
+    </label>
+  </div>
+
+  <div class="workspace">
+  <div class="col">
+  <section class="panel">
+    <h3 class="panel-title">抓取</h3>
+    <div class="label">抓取模式</div>
+    <div class="mode-switch mode-switch-3" role="radiogroup" aria-label="抓取模式">
+      <label>
+        <input type="radio" name="crawlMode" value="normal" checked />
+        <div class="mode-card">
+          <div class="mode-card-title">普通模式</div>
+          <div class="mode-card-desc">手动输入 URL，按页面接口与资源抓取</div>
+        </div>
+      </label>
+      <label>
+        <input type="radio" name="crawlMode" value="amigo" />
+        <div class="mode-card">
+          <div class="mode-card-title">Amigo 模式</div>
+          <div class="mode-card-desc">自动取链 · Socket 按类型保存 · 403 自动换链</div>
+        </div>
+      </label>
+      <label>
+        <input type="radio" name="crawlMode" value="va" />
+        <div class="mode-card">
+          <div class="mode-card-title">VA 模式</div>
+          <div class="mode-card-desc">自动取链 · Socket 二进制解成 JSON</div>
+        </div>
+      </label>
+    </div>
+
+    <div id="normalCrawlWrap">
+      <div class="section-head">
+        <div class="label">输入 URL</div>
+        <button type="button" class="smart-btn openUrlExtract" id="openUrlExtract">智能识别链接</button>
+      </div>
+      <div id="urlList">
+        <div class="url-item">
+          <input class="url-input" type="text" placeholder="请输入 URL" />
+          <button class="add-btn">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="amigoCrawlWrap" style="display:none;">
+      <div class="stack">
+        <div class="field">
+          <div class="label">选择游戏（自动取链；手动链接时用于 403 换链）</div>
+          <select id="amigoGameId">
+            <option value="">请选择游戏</option>
+          </select>
+        </div>
+        <div class="field">
+          <div class="label">打开窗口数（自动取链时有效）</div>
+          <input id="amigoWindowCount" value="3" placeholder="默认 3" />
+        </div>
+        <div class="field">
+          <div class="section-head">
+            <div class="label">手动输入链接（可选，填写后直接打开，不再自动取链）</div>
+            <button type="button" class="smart-btn openUrlExtract" id="openUrlExtractAmigo">智能识别链接</button>
+          </div>
+          <div id="amigoUrlList">
+            <div class="url-item">
+              <input class="url-input" type="text" placeholder="请输入 Amigo 游戏链接" />
+              <button class="add-btn" id="amigoUrlAdd">+</button>
+            </div>
+          </div>
+          <p class="hint">不填则按所选游戏取 demo 链；填了则按链接开窗口。Socket 写入 sockets/，403 时按所选游戏重新取链</p>
+        </div>
+      </div>
+
+      <div class="section-head" style="margin-top:16px;">
+        <div class="label">FREE_GAME / MATCH3 点击区域</div>
+        <div class="toolbar">
+          <button type="button" class="smart-btn" id="saveClickPreset">保存到当前游戏</button>
+          <button type="button" class="smart-btn" id="exportClickPreset">导出</button>
+          <button type="button" class="smart-btn" id="importClickPreset">导入</button>
+        </div>
+      </div>
+      <p class="hint">PICKME 可选固定坐标或区域切块；触发免费游戏后停止。以下区域给 FREE_GAME / MATCH3 用</p>
+      <div class="grid">
+        <div class="field">
+          <div class="label">X 最小 %</div>
+          <input id="fg2XMin" value="1" />
+        </div>
+        <div class="field">
+          <div class="label">X 最大 %</div>
+          <input id="fg2XMax" value="100" />
+        </div>
+        <div class="field">
+          <div class="label">Y 最小 %</div>
+          <input id="fg2YMin" value="20" />
+        </div>
+        <div class="field">
+          <div class="label">Y 最大 %</div>
+          <input id="fg2YMax" value="80" />
+        </div>
+        <div class="field">
+          <div class="label">间隔(秒)</div>
+          <input id="fg2Interval" value="0.8" />
+        </div>
+      </div>
+
+      <div class="label" style="margin-top:14px;">PICKME 点击模式</div>
+      <div class="mode-switch" role="radiogroup" aria-label="PICKME 模式">
+        <label>
+          <input type="radio" name="pickmeMode" value="fixed" checked />
+          <div class="mode-card">
+            <div class="mode-card-title">模式一：固定坐标</div>
+            <div class="mode-card-desc">多组 X/Y % 按序点击</div>
+          </div>
+        </label>
+        <label>
+          <input type="radio" name="pickmeMode" value="grid" />
+          <div class="mode-card">
+            <div class="mode-card-title">模式二：区域切块</div>
+            <div class="mode-card-desc">指定区域 + 行×列，按格依次点</div>
+          </div>
+        </label>
+      </div>
+      <div id="pickmeFixedWrap">
+        <div class="label">坐标组合（X% / Y%）</div>
+        <div id="pickmePointList"></div>
+      </div>
+      <div id="pickmeGridWrap" style="display:none;">
+        <div class="label">PICKME 区域（百分比）</div>
+        <div class="grid">
+          <div class="field">
+            <div class="label">X 最小 %</div>
+            <input id="pickmeGridXMin" value="1" />
+          </div>
+          <div class="field">
+            <div class="label">X 最大 %</div>
+            <input id="pickmeGridXMax" value="50" />
+          </div>
+          <div class="field">
+            <div class="label">Y 最小 %</div>
+            <input id="pickmeGridYMin" value="20" />
+          </div>
+          <div class="field">
+            <div class="label">Y 最大 %</div>
+            <input id="pickmeGridYMax" value="80" />
+          </div>
+          <div class="field">
+            <div class="label">行</div>
+            <input id="pickmeGridRows" value="4" />
+          </div>
+          <div class="field">
+            <div class="label">列</div>
+            <input id="pickmeGridCols" value="5" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="vaCrawlWrap" style="display:none;">
+      <div class="stack">
+        <div class="field">
+          <div class="label">选择游戏（自动取链）</div>
+          <select id="vaGameId">
+            <option value="">请选择游戏</option>
+          </select>
+        </div>
+        <div class="field">
+          <div class="label">打开窗口数（自动取链时有效）</div>
+          <input id="vaWindowCount" value="3" placeholder="默认 3" />
+        </div>
+        <div class="field">
+          <div class="section-head">
+            <div class="label">手动输入链接（可选，填写后直接打开，不再自动取链）</div>
+            <button type="button" class="smart-btn openUrlExtract" id="openUrlExtractVa">智能识别链接</button>
+          </div>
+          <div id="vaUrlList">
+            <div class="url-item">
+              <input class="url-input" type="text" placeholder="请输入 VA 游戏链接" />
+              <button class="add-btn" id="vaUrlAdd">+</button>
+            </div>
+          </div>
+          <p class="hint">不填则按所选游戏拼官网试玩链；填了则按链接开窗口。Socket 二进制解成 JSON 写入 sockets/，余额不足时自动换链</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:8px;">
+      <div class="label">接口识别（可选，路径片段）</div>
+      <div id="apiPatternList">
+        <div class="url-item api-pattern-item">
+          <input class="api-pattern-input" type="text" placeholder="例如 /api/spin 或 game-info" />
+          <button class="add-btn api-add-btn">+</button>
+        </div>
+      </div>
+    </div>
+  </section>
+  </div>
+
+  <div class="col">
+  <section class="panel">
+    <h3 class="panel-title">自动点击</h3>
+    <div class="grid">
+      <div class="field">
+        <div class="label">X 轴百分比</div>
+        <input id="xPercent" value="0.5" />
+      </div>
+      <div class="field">
+        <div class="label">Y 轴百分比</div>
+        <input id="yPercent" value="0.9" />
+      </div>
+      <div class="field">
+        <div class="label">点击间隔(秒)</div>
+        <input id="interval" value="2" />
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h3 class="panel-title">图像识别</h3>
+    <div id="imageStepList" class="image-step-list"></div>
+    <div class="add-step">
+      <button class="add-btn image-add-btn">+</button>
+      <div class="label">添加步骤</div>
+    </div>
+    <div class="grid">
+      <div class="field">
+        <div class="label">扫描间隔(秒)</div>
+        <input id="imageScanInterval" value="1" />
+      </div>
+      <div class="field">
+        <div class="label">重试上限</div>
+        <input id="imageMaxRetries" value="3" />
+      </div>
+    </div>
+    <div class="inline-opts">
+      <label class="choice">
+        <input type="radio" name="imageFlowMode" value="complete" checked />
+        完整流程
+      </label>
+      <label class="choice">
+        <input type="radio" name="imageFlowMode" value="retry" />
+        重试跳过
+      </label>
+      <label class="choice">
+        <input type="checkbox" id="mode3Enabled" />
+        点击联动
+      </label>
+    </div>
+    <div id="mode3ClickCountBox" style="display:none;margin-top:6px;">
+      <div class="label">联动点击次数</div>
+      <input id="mode3ClickCount" value="20" style="max-width:160px;" />
+    </div>
+  </section>
+
+  <section class="panel">
+    <h3 class="panel-title">批量取链</h3>
+    <p class="hint">按平台和游戏直接取可玩链接，支持单条复制或一次复制全部</p>
+    <div class="grid">
+      <div class="field">
+        <div class="label">平台</div>
+        <select id="linkToolType">
+          <option value="amigo">Amigo</option>
+          <option value="va">VA</option>
+        </select>
+      </div>
+      <div class="field">
+        <div class="label">游戏</div>
+        <select id="linkToolGameId">
+          <option value="">请选择游戏</option>
+        </select>
+      </div>
+      <div class="field">
+        <div class="label">数量</div>
+        <input id="linkToolCount" value="5" />
+      </div>
+    </div>
+    <div class="toolbar" style="margin-top:8px;">
+      <button type="button" class="main-btn" id="linkToolFetch">获取链接</button>
+      <button type="button" class="ghost-btn" id="linkToolCopyAll">批量复制</button>
+    </div>
+    <div id="linkToolList" class="link-tool-list"></div>
+  </section>
+  </div>
+  </div>
+
+  <div class="log" id="log"></div>
+
+</div>
+
+<!-- 智能识别链接弹窗 -->
+<div class="modal-mask" id="urlExtractModal" aria-hidden="true">
+  <div class="modal-panel" role="dialog" aria-labelledby="urlExtractTitle">
+    <h3 class="modal-title" id="urlExtractTitle">智能识别链接</h3>
+    <p class="modal-desc">粘贴含链接的混合文本，自动提取 http/https 地址并写入下方 URL 列表（去重，替换当前列表）</p>
+    <textarea
+      id="urlExtractText"
+      placeholder="在此粘贴聊天记录、日志、网页内容等…"
+    ></textarea>
+    <div class="modal-actions">
+      <button type="button" class="ghost-btn" id="urlExtractCancel">取消</button>
+      <button type="button" class="main-btn" id="urlExtractConfirm">提取并填入</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-mask" id="downloadResModal" aria-hidden="true">
+  <div class="modal-panel" role="dialog" aria-labelledby="downloadResTitle">
+    <h3 class="modal-title" id="downloadResTitle">下载静态资源</h3>
+    <p class="modal-desc">选择要下载的窗口；多个窗口会分别存到所选目录下的 window_N 子目录</p>
+    <label class="choice">
+      <input type="checkbox" id="downloadResSelectAll" checked />
+      全选
+    </label>
+    <div class="download-win-list" id="downloadResWindowList"></div>
+    <div class="modal-actions">
+      <button type="button" class="ghost-btn" id="downloadResCancel">取消</button>
+      <button type="button" class="main-btn" id="downloadResConfirm">选择存储位置并下载</button>
+    </div>
+  </div>
+</div>
+
+<script>
+
+const { ipcRenderer } = require('electron');
+let { amigoGameList } = require('./games');
+const { vaGameList } = require('./va-games');
+
+function readPercentInput(id, fallback) {
+  const n = Number(document.getElementById(id)?.value);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+const CLICK_DEFAULTS = {
+  xMin: 1,
+  xMax: 100,
+  yMin: 20,
+  yMax: 80,
+  pickmeMode: 'fixed',
+  pickmePoints: [{ x: 20, y: 35 }],
+  pickmeGrid: { xMin: 1, xMax: 50, yMin: 20, yMax: 80, rows: 4, cols: 5 }
+};
+
+function readPickmeMode() {
+  return document.querySelector('input[name="pickmeMode"]:checked')?.value === 'grid'
+    ? 'grid'
+    : 'fixed';
+}
+
+function syncPickmeModeUi() {
+  const mode = readPickmeMode();
+  const fixedWrap = document.getElementById('pickmeFixedWrap');
+  const gridWrap = document.getElementById('pickmeGridWrap');
+  if (fixedWrap) fixedWrap.style.display = mode === 'fixed' ? 'block' : 'none';
+  if (gridWrap) gridWrap.style.display = mode === 'grid' ? 'block' : 'none';
+}
+
+function readPickmeGridFromUi() {
+  return {
+    xMin: readPercentInput('pickmeGridXMin', CLICK_DEFAULTS.pickmeGrid.xMin),
+    xMax: readPercentInput('pickmeGridXMax', CLICK_DEFAULTS.pickmeGrid.xMax),
+    yMin: readPercentInput('pickmeGridYMin', CLICK_DEFAULTS.pickmeGrid.yMin),
+    yMax: readPercentInput('pickmeGridYMax', CLICK_DEFAULTS.pickmeGrid.yMax),
+    rows: Math.max(1, Number(document.getElementById('pickmeGridRows')?.value) || 4),
+    cols: Math.max(1, Number(document.getElementById('pickmeGridCols')?.value) || 5)
+  };
+}
+
+function applyPickmeGrid(grid) {
+  const g = grid || CLICK_DEFAULTS.pickmeGrid;
+  const set = (id, v) => {
+    const el = document.getElementById(id);
+    if (el) el.value = v;
+  };
+  set('pickmeGridXMin', g.xMin ?? CLICK_DEFAULTS.pickmeGrid.xMin);
+  set('pickmeGridXMax', g.xMax ?? CLICK_DEFAULTS.pickmeGrid.xMax);
+  set('pickmeGridYMin', g.yMin ?? CLICK_DEFAULTS.pickmeGrid.yMin);
+  set('pickmeGridYMax', g.yMax ?? CLICK_DEFAULTS.pickmeGrid.yMax);
+  set('pickmeGridRows', g.rows ?? CLICK_DEFAULTS.pickmeGrid.rows);
+  set('pickmeGridCols', g.cols ?? CLICK_DEFAULTS.pickmeGrid.cols);
+}
+
+function normalizePickmeGrid(raw) {
+  if (!raw || typeof raw !== 'object') return { ...CLICK_DEFAULTS.pickmeGrid };
+  return {
+    xMin: Number.isFinite(Number(raw.xMin)) ? Number(raw.xMin) : CLICK_DEFAULTS.pickmeGrid.xMin,
+    xMax: Number.isFinite(Number(raw.xMax)) ? Number(raw.xMax) : CLICK_DEFAULTS.pickmeGrid.xMax,
+    yMin: Number.isFinite(Number(raw.yMin)) ? Number(raw.yMin) : CLICK_DEFAULTS.pickmeGrid.yMin,
+    yMax: Number.isFinite(Number(raw.yMax)) ? Number(raw.yMax) : CLICK_DEFAULTS.pickmeGrid.yMax,
+    rows: Math.max(1, Number(raw.rows) || CLICK_DEFAULTS.pickmeGrid.rows),
+    cols: Math.max(1, Number(raw.cols) || CLICK_DEFAULTS.pickmeGrid.cols)
+  };
+}
+
+function normalizePickmePoints(raw) {
+  let list = [];
+  if (Array.isArray(raw)) {
+    list = raw;
+  } else if (raw && typeof raw === 'object') {
+    // 兼容旧字段 pickmeX / pickmeY
+    const x = Number(raw.pickmeX);
+    const y = Number(raw.pickmeY);
+    if (Number.isFinite(x) || Number.isFinite(y)) {
+      list = [{ x: Number.isFinite(x) ? x : 20, y: Number.isFinite(y) ? y : 35 }];
+    }
+    if (Array.isArray(raw.pickmePoints)) list = raw.pickmePoints;
+  }
+  const points = list
+    .map(p => ({
+      x: Number(p && p.x),
+      y: Number(p && p.y)
+    }))
+    .filter(p => Number.isFinite(p.x) && Number.isFinite(p.y));
+  return points.length ? points : [{ x: 20, y: 35 }];
+}
+
+function createPickmePointItem(x = 20, y = 35) {
+  const div = document.createElement('div');
+  div.className = 'url-item pickme-point-item';
+  div.innerHTML = `
+    <input class="pickme-x" type="text" placeholder="X %" />
+    <input class="pickme-y" type="text" placeholder="Y %" />
+    <button type="button" class="add-btn pickme-add-btn">+</button>
+    <button type="button" class="remove-btn pickme-remove-btn">-</button>
+  `;
+  div.querySelector('.pickme-x').value = x;
+  div.querySelector('.pickme-y').value = y;
+  div.querySelector('.pickme-add-btn').onclick = () => {
+    document.getElementById('pickmePointList')?.appendChild(createPickmePointItem());
+    pushPickmeConfigLive();
+  };
+  div.querySelector('.pickme-remove-btn').onclick = () => {
+    const items = document.querySelectorAll('#pickmePointList .pickme-point-item');
+    if (items.length <= 1) {
+      div.querySelector('.pickme-x').value = '20';
+      div.querySelector('.pickme-y').value = '35';
+      pushPickmeConfigLive();
+      return;
+    }
+    div.remove();
+    pushPickmeConfigLive();
+  };
+  div.querySelector('.pickme-x').addEventListener('input', pushPickmeConfigLive);
+  div.querySelector('.pickme-y').addEventListener('input', pushPickmeConfigLive);
+  return div;
+}
+
+function readPickmePointsFromUi() {
+  const rows = [...document.querySelectorAll('#pickmePointList .pickme-point-item')];
+  const points = rows
+    .map(row => ({
+      x: Number(row.querySelector('.pickme-x')?.value),
+      y: Number(row.querySelector('.pickme-y')?.value)
+    }))
+    .filter(p => Number.isFinite(p.x) && Number.isFinite(p.y));
+  return points.length ? points : [{ x: 20, y: 35 }];
+}
+
+function renderPickmePoints(points) {
+  const list = document.getElementById('pickmePointList');
+  if (!list) return;
+  const pts = normalizePickmePoints(points);
+  list.innerHTML = '';
+  pts.forEach(p => list.appendChild(createPickmePointItem(p.x, p.y)));
+}
+
+function pushPickmeConfigLive() {
+  ipcRenderer.invoke('update-region-click', {
+    pickmeMode: readPickmeMode(),
+    pickmePoints: readPickmePointsFromUi(),
+    pickmeGrid: readPickmeGridFromUi()
+  }).catch(() => {});
+}
+
+function readClickPreset() {
+  return {
+    xMin: readPercentInput('fg2XMin', CLICK_DEFAULTS.xMin),
+    xMax: readPercentInput('fg2XMax', CLICK_DEFAULTS.xMax),
+    yMin: readPercentInput('fg2YMin', CLICK_DEFAULTS.yMin),
+    yMax: readPercentInput('fg2YMax', CLICK_DEFAULTS.yMax),
+    pickmeMode: readPickmeMode(),
+    pickmePoints: readPickmePointsFromUi(),
+    pickmeGrid: readPickmeGridFromUi()
+  };
+}
+
+function applyClickPreset(click) {
+  const c = click || CLICK_DEFAULTS;
+  const set = (id, v) => {
+    const el = document.getElementById(id);
+    if (el) el.value = v;
+  };
+  set('fg2XMin', c.xMin ?? CLICK_DEFAULTS.xMin);
+  set('fg2XMax', c.xMax ?? CLICK_DEFAULTS.xMax);
+  set('fg2YMin', c.yMin ?? CLICK_DEFAULTS.yMin);
+  set('fg2YMax', c.yMax ?? CLICK_DEFAULTS.yMax);
+  const mode = c.pickmeMode === 'grid' ? 'grid' : 'fixed';
+  document.querySelectorAll('input[name="pickmeMode"]').forEach(el => {
+    el.checked = el.value === mode;
+  });
+  syncPickmeModeUi();
+  renderPickmePoints(c.pickmePoints || c);
+  applyPickmeGrid(normalizePickmeGrid(c.pickmeGrid));
+}
+
+function currentAmigoGame() {
+  const id = document.getElementById('amigoGameId')?.value || '';
+  if (!id) return null;
+  return amigoGameList.find(g => String(g.id) === String(id)) || null;
+}
+
+function loadClickForSelectedGame() {
+  const g = currentAmigoGame();
+  applyClickPreset(g && g.click ? g.click : null);
+}
+
+async function persistAmigoGames() {
+  const res = await ipcRenderer.invoke('save-amigo-games', amigoGameList);
+  if (!res || !res.ok) {
+    log('保存 games.js 失败: ' + (res && res.message ? res.message : ''));
+    return false;
+  }
+  return true;
+}
+
+const logEl = document.getElementById('log');
+
+const statusEl = document.getElementById('status');
+
+const urlList = document.getElementById('urlList');
+const apiPatternList = document.getElementById('apiPatternList');
+const imageStepList = document.getElementById('imageStepList');
+
+(function initCrawlModeUi() {
+  const sel = document.getElementById('amigoGameId');
+  if (sel) {
+    for (const g of amigoGameList) {
+      const opt = document.createElement('option');
+      opt.value = g.id;
+      opt.textContent = `${g.id} — ${g.label}`;
+      sel.appendChild(opt);
+    }
+    sel.addEventListener('change', loadClickForSelectedGame);
+  }
+  const vaSel = document.getElementById('vaGameId');
+  if (vaSel) {
+    for (const g of vaGameList) {
+      const opt = document.createElement('option');
+      opt.value = g.id;
+      opt.textContent = `${g.id} — ${g.label}`;
+      vaSel.appendChild(opt);
+    }
+  }
+  // 初始化 PICKME 坐标列表（绑定 +/- 与实时同步）
+  renderPickmePoints(CLICK_DEFAULTS.pickmePoints);
+  applyPickmeGrid(CLICK_DEFAULTS.pickmeGrid);
+  syncPickmeModeUi();
+  document.querySelectorAll('input[name="pickmeMode"]').forEach(el => {
+    el.addEventListener('change', () => {
+      syncPickmeModeUi();
+      pushPickmeConfigLive();
+    });
+  });
+  ['pickmeGridXMin', 'pickmeGridXMax', 'pickmeGridYMin', 'pickmeGridYMax', 'pickmeGridRows', 'pickmeGridCols'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', pushPickmeConfigLive);
+  });
+
+  const syncMode = () => {
+    const mode =
+      document.querySelector('input[name="crawlMode"]:checked')?.value ||
+      'normal';
+    const normalWrap = document.getElementById('normalCrawlWrap');
+    const amigoWrap = document.getElementById('amigoCrawlWrap');
+    const vaWrap = document.getElementById('vaCrawlWrap');
+    if (normalWrap) normalWrap.style.display = mode === 'normal' ? 'block' : 'none';
+    if (amigoWrap) amigoWrap.style.display = mode === 'amigo' ? 'block' : 'none';
+    if (vaWrap) vaWrap.style.display = mode === 'va' ? 'block' : 'none';
+  };
+
+  document.querySelectorAll('input[name="crawlMode"]').forEach(el => {
+    el.addEventListener('change', syncMode);
+  });
+  syncMode();
+})();
+
+function fillLinkToolGames() {
+  const type = document.getElementById('linkToolType')?.value || 'amigo';
+  const sel = document.getElementById('linkToolGameId');
+  if (!sel) return;
+  const list = type === 'va' ? vaGameList : amigoGameList;
+  sel.innerHTML = '<option value="">请选择游戏</option>';
+  for (const g of list) {
+    const opt = document.createElement('option');
+    opt.value = g.id;
+    opt.textContent = `${g.id} — ${g.label}`;
+    sel.appendChild(opt);
+  }
+}
+
+async function copyText(text) {
+  const value = String(text || '');
+  if (!value) return false;
+  try {
+    await navigator.clipboard.writeText(value);
+    return true;
+  } catch (_) {
+    const ta = document.createElement('textarea');
+    ta.value = value;
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand('copy');
+    ta.remove();
+    return ok;
+  }
+}
+
+function renderLinkToolList(links) {
+  const box = document.getElementById('linkToolList');
+  if (!box) return;
+  box.innerHTML = '';
+  (links || []).forEach((url, i) => {
+    const row = document.createElement('div');
+    row.className = 'link-tool-item';
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.readOnly = true;
+    input.value = url;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'smart-btn';
+    btn.textContent = '复制';
+    btn.onclick = async () => {
+      const ok = await copyText(url);
+      log(ok ? `已复制第 ${i + 1} 条链接` : '复制失败');
+    };
+    row.appendChild(input);
+    row.appendChild(btn);
+    box.appendChild(row);
+  });
+}
+
+function getLinkToolUrls() {
+  return [...document.querySelectorAll('#linkToolList input')]
+    .map(el => String(el.value || '').trim())
+    .filter(Boolean);
+}
+
+document.getElementById('linkToolType')?.addEventListener('change', fillLinkToolGames);
+fillLinkToolGames();
+
+document.getElementById('linkToolFetch')?.addEventListener('click', async () => {
+  const type = document.getElementById('linkToolType')?.value || 'amigo';
+  const gameId = document.getElementById('linkToolGameId')?.value || '';
+  const count = Number(document.getElementById('linkToolCount')?.value) || 1;
+  if (!gameId) {
+    log('请先选择要取链的游戏');
+    return;
+  }
+  log(`正在获取 ${type.toUpperCase()} 链接 x${count}…`);
+  const res = await ipcRenderer.invoke('fetch-demo-links', { type, gameId, count });
+  if (!res.ok) {
+    log('ERROR: ' + (res.message || '取链失败'));
+    return;
+  }
+  renderLinkToolList(res.links || []);
+  log(`已获取 ${res.links.length} 条 ${type.toUpperCase()} 链接`);
+});
+
+document.getElementById('linkToolCopyAll')?.addEventListener('click', async () => {
+  const urls = getLinkToolUrls();
+  if (!urls.length) {
+    log('没有可复制的链接，请先获取');
+    return;
+  }
+  const ok = await copyText(urls.join('\n'));
+  log(ok ? `已批量复制 ${urls.length} 条链接` : '批量复制失败');
+});
+
+function log(msg) {
+  const time = new Date().toLocaleTimeString();
+  const line = document.createElement('div');
+  line.textContent = `[${time}] ${msg}`;
+  logEl.appendChild(line);
+  while (logEl.childElementCount > 200) {
+    logEl.removeChild(logEl.firstChild);
+  }
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+function setStatus(text, color = '#22c55e') {
+
+  statusEl.innerHTML = `状态：${text}`;
+
+  statusEl.style.color = color;
+
+}
+
+// 接收主进程的图像识别日志
+ipcRenderer.on('image-flow-log', (e, msg) => {
+  log(msg);
+});
+
+document.getElementById('saveClickPreset')?.addEventListener('click', async () => {
+  const g = currentAmigoGame();
+  if (!g) {
+    log('请先选择游戏，再保存点击区域');
+    return;
+  }
+  g.click = readClickPreset();
+  if (await persistAmigoGames()) {
+    log(`已保存 ${g.id} — ${g.label} 的点击区域到 games.js`);
+    ipcRenderer.invoke('update-region-click', {
+      pickmeMode: g.click.pickmeMode,
+      pickmePoints: g.click.pickmePoints,
+      pickmeGrid: g.click.pickmeGrid
+    }).catch(() => {});
+  }
+});
+
+document.getElementById('exportClickPreset')?.addEventListener('click', async () => {
+  const payload = amigoGameList
+    .filter(g => g.click)
+    .map(g => ({ id: g.id, label: g.label, click: g.click }));
+  if (!payload.length) {
+    log('没有已保存的点击区域可导出，请先保存到当前游戏');
+    return;
+  }
+  const res = await ipcRenderer.invoke('export-amigo-click', payload);
+  if (res && res.canceled) return;
+  if (res && res.ok) log('已导出点击区域: ' + res.path);
+  else log('导出失败: ' + (res && res.message ? res.message : ''));
+});
+
+document.getElementById('importClickPreset')?.addEventListener('click', async () => {
+  const res = await ipcRenderer.invoke('import-amigo-click');
+  if (res && res.canceled) return;
+  if (!res || !res.ok) {
+    log('导入失败: ' + (res && res.message ? res.message : ''));
+    return;
+  }
+  const data = res.data;
+  let rows = [];
+  if (Array.isArray(data)) rows = data;
+  else if (data && Array.isArray(data.games)) rows = data.games;
+  else if (data && typeof data === 'object') {
+    rows = Object.keys(data).map(id => ({
+      id,
+      click: data[id] && data[id].click ? data[id].click : data[id]
+    }));
+  }
+  let n = 0;
+  for (const row of rows) {
+    if (!row || row.id == null) continue;
+    const g = amigoGameList.find(x => String(x.id) === String(row.id));
+    const click = row.click;
+    if (!g || !click || typeof click !== 'object') continue;
+    g.click = {
+      xMin: Number.isFinite(Number(click.xMin)) ? Number(click.xMin) : CLICK_DEFAULTS.xMin,
+      xMax: Number.isFinite(Number(click.xMax)) ? Number(click.xMax) : CLICK_DEFAULTS.xMax,
+      yMin: Number.isFinite(Number(click.yMin)) ? Number(click.yMin) : CLICK_DEFAULTS.yMin,
+      yMax: Number.isFinite(Number(click.yMax)) ? Number(click.yMax) : CLICK_DEFAULTS.yMax,
+      pickmeMode: click.pickmeMode === 'grid' ? 'grid' : 'fixed',
+      pickmePoints: normalizePickmePoints(click),
+      pickmeGrid: normalizePickmeGrid(click.pickmeGrid)
+    };
+    n++;
+  }
+  if (!n) {
+    log('导入文件没有匹配到现有游戏');
+    return;
+  }
+  if (await persistAmigoGames()) {
+    loadClickForSelectedGame();
+    log(`已导入 ${n} 个游戏的点击区域到 games.js`);
+  }
+});
+
+// =========================
+// URL ITEM
+// =========================
+function createUrlItem(value = '', listId = 'urlList') {
+
+  const div = document.createElement('div');
+
+  div.className = 'url-item';
+
+  div.innerHTML = `
+    <input
+      class="url-input"
+      type="text"
+      placeholder="请输入 URL"
+    />
+
+    <button class="add-btn">+</button>
+
+    <button class="remove-btn">-</button>
+  `;
+
+  div.querySelector('.url-input').value = value || '';
+
+  // 添加
+  div.querySelector('.add-btn').onclick = () => {
+    const list = document.getElementById(listId);
+    if (list) list.appendChild(createUrlItem('', listId));
+  };
+
+  // 删除
+  div.querySelector('.remove-btn').onclick = () => {
+
+    const items =
+      document.querySelectorAll('#' + listId + ' .url-item');
+
+    if (items.length <= 1) {
+      div.querySelector('.url-input').value = '';
+      return;
+    }
+
+    div.remove();
+
+  };
+
+  return div;
+
+}
+
+// 初始化 +
+document.querySelector('#urlList .add-btn').onclick = () => {
+
+  urlList.appendChild(
+    createUrlItem()
+  );
+
+};
+
+document.querySelector('#amigoUrlAdd').onclick = () => {
+  const list = document.getElementById('amigoUrlList');
+  if (list) list.appendChild(createUrlItem('', 'amigoUrlList'));
+};
+
+document.querySelector('#vaUrlAdd').onclick = () => {
+  const list = document.getElementById('vaUrlList');
+  if (list) list.appendChild(createUrlItem('', 'vaUrlList'));
+};
+
+/** 从混合文本提取 http(s) 链接并去重（保留 ?query，问号只在末尾当标点剥掉） */
+function extractUrlsFromText(text) {
+  const raw = String(text || '');
+  const re = /https?:\/\/[^\s<>"'`）】》」』\]\}|,，。；;！!\u3000]+/gi;
+  const found = [];
+  const seen = new Set();
+  let m;
+  while ((m = re.exec(raw)) !== null) {
+    let url = m[0]
+      // 去掉尾部常见标点/括号残留（含句末 ? / ？，不影响中间的查询串）
+      .replace(/[.,;:!?，。；：！？、)》」』】\]\}>]+$/g, '');
+    if (!/^https?:\/\//i.test(url)) continue;
+    if (seen.has(url)) continue;
+    seen.add(url);
+    found.push(url);
+  }
+  return found;
+}
+
+function currentUrlListId() {
+  const mode =
+    document.querySelector('input[name="crawlMode"]:checked')?.value ||
+    'normal';
+  if (mode === 'amigo') return 'amigoUrlList';
+  if (mode === 'va') return 'vaUrlList';
+  return 'urlList';
+}
+
+function replaceUrlList(urls, listId) {
+  const id = listId || currentUrlListId();
+  const listEl = document.getElementById(id);
+  if (!listEl) return;
+  listEl.innerHTML = '';
+  const list = urls && urls.length ? urls : [''];
+  list.forEach(u => listEl.appendChild(createUrlItem(u, id)));
+}
+
+(function initUrlExtractModal() {
+  const modal = document.getElementById('urlExtractModal');
+  const textarea = document.getElementById('urlExtractText');
+  const openBtns = document.querySelectorAll('.openUrlExtract');
+  const cancelBtn = document.getElementById('urlExtractCancel');
+  const confirmBtn = document.getElementById('urlExtractConfirm');
+  if (!modal || !openBtns.length) return;
+
+  const open = () => {
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+    textarea.value = '';
+    setTimeout(() => textarea.focus(), 50);
+  };
+  const close = () => {
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+  };
+
+  openBtns.forEach(btn => {
+    btn.onclick = open;
+  });
+  cancelBtn.onclick = close;
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) close();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('open')) close();
+  });
+
+  confirmBtn.onclick = () => {
+    const urls = extractUrlsFromText(textarea.value);
+    if (!urls.length) {
+      log('未识别到有效链接，请检查粘贴内容');
+      return;
+    }
+    replaceUrlList(urls);
+    log(`智能识别：已填入 ${urls.length} 条链接`);
+    close();
+  };
+})();
+
+// =========================
+// API PATTERN ITEM
+// =========================
+function createApiPatternItem(value = '') {
+
+  const div = document.createElement('div');
+
+  div.className = 'url-item api-pattern-item';
+
+  div.innerHTML = `
+    <input
+      class="api-pattern-input"
+      type="text"
+      placeholder="例如 /api/spin 或 game-info"
+      value="${value}"
+    />
+
+    <button class="add-btn api-add-btn">+</button>
+
+    <button class="remove-btn api-remove-btn">-</button>
+  `;
+
+  div.querySelector('.api-add-btn').onclick = () => {
+    apiPatternList.appendChild(createApiPatternItem());
+  };
+
+  div.querySelector('.api-remove-btn').onclick = () => {
+    const items = document.querySelectorAll('.api-pattern-item');
+    if (items.length <= 1) return;
+    div.remove();
+  };
+
+  return div;
+
+}
+
+document.querySelector('.api-add-btn').onclick = () => {
+  apiPatternList.appendChild(createApiPatternItem());
+};
+
+// =========================
+// IMAGE FLOW STEPS
+// =========================
+function createImageStepItem(step = {}) {
+  const div = document.createElement('div');
+  div.className = 'image-step-item';
+  div.dataset.path = step.path || '';
+
+  const indexEl = document.createElement('div');
+  indexEl.className = 'step-index';
+  indexEl.textContent = '?';
+
+  const preview = document.createElement('img');
+  preview.className = 'step-preview';
+  if (step.path) {
+    preview.src = 'file:///' + step.path.replace(/\\/g, '/');
+  }
+
+  const info = document.createElement('div');
+  info.className = 'step-info';
+
+  const nameEl = document.createElement('div');
+  nameEl.className = step.path ? 'step-name' : 'step-placeholder';
+  nameEl.textContent = step.path
+    ? step.path.split(/[\\/]/).pop()
+    : '未选择截图';
+
+  info.appendChild(nameEl);
+
+  const pickBtn = document.createElement('button');
+  pickBtn.className = 'pick-btn';
+  pickBtn.textContent = '选择图片';
+  pickBtn.onclick = async () => {
+    const filePath = await ipcRenderer.invoke('select-image-file');
+    if (!filePath) return;
+    div.dataset.path = filePath;
+    preview.src = 'file:///' + filePath.replace(/\\/g, '/');
+    nameEl.className = 'step-name';
+    nameEl.textContent = filePath.split(/[\\/]/).pop();
+    refreshImageStepIndexes();
+    log('已选择截图：' + filePath.split(/[\\/]/).pop());
+  };
+
+  const removeBtn = document.createElement('button');
+  removeBtn.className = 'remove-btn';
+  removeBtn.textContent = '-';
+  removeBtn.onclick = () => {
+    const items = document.querySelectorAll('.image-step-item');
+    if (items.length <= 1) return;
+    div.remove();
+    refreshImageStepIndexes();
+  };
+
+  div.appendChild(indexEl);
+  div.appendChild(preview);
+  div.appendChild(info);
+  div.appendChild(pickBtn);
+  div.appendChild(removeBtn);
+
+  return div;
+}
+
+function refreshImageStepIndexes() {
+  document.querySelectorAll('.image-step-item').forEach((item, i) => {
+    item.querySelector('.step-index').textContent = i + 1;
+  });
+}
+
+function getImageSteps() {
+  return [...document.querySelectorAll('.image-step-item')]
+    .map((item, i) => ({
+      path: item.dataset.path,
+      name: `step-${i + 1}`
+    }))
+    .filter(step => step.path);
+}
+
+document.querySelector('.image-add-btn').onclick = () => {
+  imageStepList.appendChild(createImageStepItem());
+  refreshImageStepIndexes();
+};
+
+imageStepList.appendChild(createImageStepItem());
+refreshImageStepIndexes();
+
+// =========================
+// 选择目录
+// =========================
+async function applySaveDir(dir) {
+  if (!dir) return;
+  document.getElementById('dir').value = dir;
+  log("已选择目录：" + dir);
+  try {
+    await ipcRenderer.invoke('save-bk-settings', { dir });
+  } catch (e) {}
+}
+
+document.getElementById('select').onclick = async () => {
+  await applySaveDir(await ipcRenderer.invoke('select-folder'));
+};
+
+document.getElementById('dir').onclick = async () => {
+  await applySaveDir(await ipcRenderer.invoke('select-folder'));
+};
+
+// =========================
+// 开始抓取
+// =========================
+document.getElementById('start').onclick =
+async () => {
+
+  const crawlMode =
+    document.querySelector('input[name="crawlMode"]:checked')?.value ||
+    'normal';
+
+  const dir =
+    document.getElementById('dir').value;
+
+  const splitByWindow =
+    document.getElementById('splitByWindow').checked;
+
+  const apiPatterns =
+    [...document.querySelectorAll('.api-pattern-input')]
+      .map(i => i.value.trim())
+      .filter(Boolean);
+
+  if (!dir) {
+    log("请选择保存目录");
+    return;
+  }
+
+  let urls = [];
+  let gameType = 'generic';
+  let gameId = '';
+  let windowCount = 1;
+  let regionClick = null;
+
+  if (crawlMode === 'amigo') {
+    gameType = 'amigo';
+    gameId = document.getElementById('amigoGameId')?.value || '';
+    windowCount = Math.max(
+      1,
+      Number(document.getElementById('amigoWindowCount')?.value) || 3
+    );
+    urls =
+      [...document.querySelectorAll('#amigoUrlList .url-input')]
+        .map(i => i.value.trim())
+        .filter(Boolean);
+    if (!urls.length && !gameId) {
+      log("请选择 Amigo 游戏，或手动输入链接");
+      return;
+    }
+    regionClick = {
+      xMin: readPercentInput('fg2XMin', 1),
+      xMax: readPercentInput('fg2XMax', 100),
+      yMin: readPercentInput('fg2YMin', 20),
+      yMax: readPercentInput('fg2YMax', 80),
+      pickmeMode: readPickmeMode(),
+      pickmePoints: readPickmePointsFromUi(),
+      pickmeGrid: readPickmeGridFromUi(),
+      interval: Math.max(200, Math.round((Number(document.getElementById('fg2Interval')?.value) || 0.8) * 1000))
+    };
+  } else if (crawlMode === 'va') {
+    gameType = 'va';
+    gameId = document.getElementById('vaGameId')?.value || '';
+    windowCount = Math.max(
+      1,
+      Number(document.getElementById('vaWindowCount')?.value) || 3
+    );
+    urls =
+      [...document.querySelectorAll('#vaUrlList .url-input')]
+        .map(i => i.value.trim())
+        .filter(Boolean);
+    if (!urls.length && !gameId) {
+      log("请选择 VA 游戏，或手动输入链接");
+      return;
+    }
+  } else {
+    urls =
+      [...document.querySelectorAll('.url-input')]
+        .map(i => i.value.trim())
+        .filter(Boolean);
+    if (!urls.length) {
+      log("请输入 URL");
+      return;
+    }
+  }
+
+  setStatus("抓取中...", "#f59e0b");
+
+  log("开始抓取...");
+  log(splitByWindow ? "已启用分窗口存储" : "未启用分窗口存储，所有窗口共用目录");
+  if (crawlMode === 'amigo') {
+    const g = amigoGameList.find(x => String(x.id) === String(gameId));
+    if (urls.length) {
+      log(`Amigo 模式：手动链接 ${urls.length} 个${gameId ? '，游戏 ' + gameId + (g ? ' — ' + g.label : '') : '（未选游戏，403 不换链）'}`);
+    } else {
+      log(`Amigo 模式：${gameId}${g ? ' — ' + g.label : ''}，窗口数 ${windowCount}（逐个取链并打开）`);
+    }
+    log('Amigo：PICKME 多组坐标依次点，触发免费游戏后停止再走后面');
+  } else if (crawlMode === 'va') {
+    const g = vaGameList.find(x => String(x.id) === String(gameId));
+    if (urls.length) {
+      log(`VA 模式：手动链接 ${urls.length} 个${gameId ? '，游戏 ' + gameId + (g ? ' — ' + g.label : '') : ''}`);
+    } else {
+      log(`VA 模式：${gameId}${g ? ' — ' + g.label : ''}，窗口数 ${windowCount}（官网取试玩链并打开）`);
+    }
+    log('VA：Socket 二进制解成 JSON，按命令名写入 sockets/；余额不足自动换链');
+  } else {
+    log(`普通模式，URL 数量: ${urls.length}`);
+  }
+  log(apiPatterns.length
+    ? `已配置 ${apiPatterns.length} 个接口片段，匹配的 octet-stream 将按 protobuf 解析`
+    : "将保存 JSON、表单串接口（如 gameService）与 octet-stream");
+
+  try {
+
+    await ipcRenderer.invoke(
+      'start-multi',
+      {
+        urls,
+        dir,
+        splitByWindow,
+        apiPatterns,
+        gameType,
+        gameId,
+        windowCount,
+        crawlMode,
+        regionClick
+      }
+    );
+
+    setStatus("抓取完成");
+
+    log("全部任务完成");
+
+  } catch(e) {
+
+    setStatus("抓取失败", "#ef4444");
+
+    log("ERROR: " + e.message);
+
+  }
+
+};
+
+// =========================
+// 开始自动点击
+// =========================
+// 模式三开关：控制点击次数输入框的显示
+document.getElementById('mode3Enabled').onchange = (e) => {
+  document.getElementById('mode3ClickCountBox').style.display =
+    e.target.checked ? 'block' : 'none';
+};
+
+document.getElementById('startClick').onclick =
+async () => {
+
+  const x =
+    Number(
+      document.getElementById('xPercent').value
+    );
+
+  const y =
+    Number(
+      document.getElementById('yPercent').value
+    );
+
+  const interval =
+    Number(
+      document.getElementById('interval').value
+    ) * 1000
+
+  const mode3Enabled =
+    document.getElementById('mode3Enabled').checked;
+
+  if (mode3Enabled) {
+    // 模式三：自动点击 + 图像识别联动
+    const steps = getImageSteps();
+    if (!steps.length) {
+      log('模式三需要先为图像识别步骤选择截图');
+      return;
+    }
+
+    const clickCount = Math.max(1, Number(document.getElementById('mode3ClickCount').value) || 20);
+    const imageInterval = Number(document.getElementById('imageScanInterval').value) * 1000;
+    const imageMode = document.querySelector('input[name="imageFlowMode"]:checked').value;
+    const imageEngine = 'opencv';
+    const imageMaxRetries = Math.max(1, Number(document.getElementById('imageMaxRetries').value) || 3);
+
+    const res = await ipcRenderer.invoke('start-click-all', {
+      x,
+      y,
+      interval,
+      mode3: true,
+      clickCount,
+      steps,
+      imageInterval,
+      imageMode,
+      imageEngine,
+      imageMaxRetries
+    });
+
+    if (res.ok) {
+      setStatus('模式三运行中（点击+图像识别联动）', '#22c55e');
+      log(`启动模式三：OpenCV，每点击 ${clickCount} 次执行一次图像识别流程（${imageMode === 'retry' ? '重试模式上限' + imageMaxRetries + '次' : '完整模式'}）`);
+    } else {
+      setStatus('启动失败', '#ef4444');
+      log('ERROR: ' + (res.message || '无运行中窗口'));
+    }
+    return;
+  }
+
+  const res = await ipcRenderer.invoke(
+    'start-click-all',
+    {
+      x,
+      y,
+      interval
+    }
+  );
+    console.log(res);
+    if(res.ok) {
+      setStatus("自动点击运行中", "#22c55e");
+    } else{
+      setStatus("无运行中窗口", "#22c55e");
+    }
+  log(
+    `启动自动点击 x=${x} y=${y} interval=${interval}`,res
+  );
+
+};
+
+// =========================
+// 停止自动点击
+// =========================
+document.getElementById('stopClick').onclick =
+async () => {
+
+  await ipcRenderer.invoke(
+    'stop-click-all'
+  );
+
+  setStatus("自动点击已停止", "#ef4444");
+
+  log("自动点击已停止");
+
+};
+
+// =========================
+// 图像识别流程
+// =========================
+document.getElementById('startImageFlow').onclick = async () => {
+  const steps = getImageSteps();
+  const interval = Number(document.getElementById('imageScanInterval').value) * 1000;
+  const mode = document.querySelector('input[name="imageFlowMode"]:checked').value;
+  const engine = 'opencv';
+  const maxRetries = Math.max(1, Number(document.getElementById('imageMaxRetries').value) || 3);
+
+  if (!steps.length) {
+    log('请至少为一个步骤选择截图');
+    return;
+  }
+
+  const res = await ipcRenderer.invoke('start-image-flow-all', {
+    steps,
+    interval,
+    mode,
+    engine,
+    maxRetries
+  });
+
+  if (res.ok) {
+    setStatus('图像识别运行中', '#22c55e');
+    const modeText = mode === 'retry'
+      ? `重试模式（上限 ${maxRetries} 次后跳过）`
+      : '完整模式（等待每步匹配）';
+    log(`图像识别已启动，引擎=OpenCV，共 ${steps.length} 个步骤，间隔 ${interval}ms，阈值自动，${modeText}`);
+  } else {
+    setStatus('图像识别启动失败', '#ef4444');
+    log('ERROR: ' + (res.message || '启动失败'));
+  }
+};
+
+document.getElementById('stopImageFlow').onclick = async () => {
+  await ipcRenderer.invoke('stop-image-flow-all');
+  setStatus('图像识别已停止', '#ef4444');
+  log('图像识别已停止');
+};
+
+let downloadingResources = false;
+
+async function pickResourceSaveDir() {
+  const dir = await ipcRenderer.invoke('select-folder');
+  return dir || '';
+}
+
+async function runResourceDownload(windowIndexes) {
+  if (downloadingResources) return;
+  if (!windowIndexes.length) {
+    log('请至少选择一个窗口');
+    return;
+  }
+  const saveDir = await pickResourceSaveDir();
+  if (!saveDir) {
+    log('已取消选择存储位置');
+    return;
+  }
+  downloadingResources = true;
+  setStatus('正在下载静态资源...', '#f59e0b');
+  log(`开始下载静态资源，窗口 ${windowIndexes.map(i => i + 1).join(',')} → ${saveDir}`);
+  try {
+    const res = await ipcRenderer.invoke('download-static-resources', {
+      windowIndexes,
+      saveDir
+    });
+    if (res.ok) {
+      log(`静态资源下载完成：已存 ${res.saved}，跳过 ${res.skipped}，失败 ${res.failed} → ${res.dir}`);
+      setStatus('静态资源已下载', '#22c55e');
+    } else {
+      log('ERROR: ' + (res.message || '下载静态资源失败'));
+      setStatus('资源下载失败', '#ef4444');
+    }
+  } finally {
+    downloadingResources = false;
+  }
+}
+
+(function initDownloadResModal() {
+  const modal = document.getElementById('downloadResModal');
+  const listEl = document.getElementById('downloadResWindowList');
+  const allEl = document.getElementById('downloadResSelectAll');
+  if (!modal || !listEl) return;
+
+  const close = () => {
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+  };
+
+  function selectedIndexes() {
+    return [...listEl.querySelectorAll('input[data-win-index]:checked')]
+      .map(el => Number(el.dataset.winIndex));
+  }
+
+  function syncSelectAll() {
+    const boxes = [...listEl.querySelectorAll('input[data-win-index]')];
+    allEl.checked = boxes.length > 0 && boxes.every(el => el.checked);
+  }
+
+  document.getElementById('downloadResCancel').onclick = close;
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) close();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('open')) close();
+  });
+  allEl.onchange = () => {
+    listEl.querySelectorAll('input[data-win-index]').forEach(el => {
+      el.checked = allEl.checked;
+    });
+  };
+  listEl.addEventListener('change', syncSelectAll);
+
+  document.getElementById('downloadResConfirm').onclick = async () => {
+    const indexes = selectedIndexes();
+    close();
+    await runResourceDownload(indexes);
+  };
+
+  document.getElementById('downloadResources').onclick = async () => {
+    if (downloadingResources) return;
+    const listed = await ipcRenderer.invoke('list-resource-windows');
+    const windows = (listed && listed.windows) || [];
+    if (!windows.length) {
+      log('没有可下载的窗口，请先开始抓取');
+      return;
+    }
+    if (windows.length === 1) {
+      await runResourceDownload([windows[0].index]);
+      return;
+    }
+    listEl.innerHTML = '';
+    windows.forEach(w => {
+      const label = document.createElement('label');
+      label.className = 'download-win-item';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.dataset.winIndex = String(w.index);
+      cb.checked = true;
+      const box = document.createElement('div');
+      const title = document.createElement('div');
+      title.textContent = `${w.label} · ${w.count} 个资源`;
+      const urlEl = document.createElement('div');
+      urlEl.className = 'win-url';
+      urlEl.textContent = w.url || '(未获取到地址)';
+      box.appendChild(title);
+      box.appendChild(urlEl);
+      label.appendChild(cb);
+      label.appendChild(box);
+      listEl.appendChild(label);
+    });
+    allEl.checked = true;
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+  };
+})();
+
+document.getElementById('captureShot').onclick = async () => {
+  const dir = document.getElementById('dir').value;
+  const res = await ipcRenderer.invoke('capture-screenshots', { dir });
+  if (res.ok) {
+    log(`已保存 ${res.count} 张窗口截图到：${res.dir}`);
+    setStatus('截图已保存', '#22c55e');
+  } else {
+    log('ERROR: ' + (res.message || '保存截图失败'));
+    setStatus('截图保存失败', '#ef4444');
+  }
+};
+
+// =========================
+// 关闭所有窗口
+// =========================
+document.getElementById('closeAllWindow').onclick = async () => {
+  const confirmed = window.confirm('确定要关闭所有窗口吗？');
+  if (!confirmed) {
+    return;
+  }
+  await ipcRenderer.invoke(
+    'close-all-windows'
+  );
+}
+
+function fillLaunchUrls(listId, urls) {
+  const list = document.getElementById(listId);
+  if (!list) return;
+  list.innerHTML = '';
+  const values = urls.length ? urls : [''];
+  for (const url of values) {
+    list.appendChild(createUrlItem(url, listId));
+  }
+}
+
+async function applyLaunchJob() {
+  let job = null;
+  try {
+    job = await ipcRenderer.invoke('consume-launch-job');
+  } catch (e) {
+    return;
+  }
+  if (!job || !job.mode) {
+    try {
+      const settings = await ipcRenderer.invoke('get-bk-settings');
+      if (settings?.dir && !document.getElementById('dir').value) {
+        document.getElementById('dir').value = settings.dir;
+      }
+    } catch (e) {}
+    return;
+  }
+
+  const mode = ['normal', 'amigo', 'va'].includes(job.mode) ? job.mode : 'normal';
+  const radio = document.querySelector(`input[name="crawlMode"][value="${mode}"]`);
+  if (radio) {
+    radio.checked = true;
+    radio.dispatchEvent(new Event('change'));
+  }
+  const listId = mode === 'amigo' ? 'amigoUrlList' : mode === 'va' ? 'vaUrlList' : 'urlList';
+  const urls = Array.isArray(job.urls) ? job.urls.map(u => String(u).trim()).filter(Boolean) : [];
+  fillLaunchUrls(listId, urls);
+
+  let dir = String(job.dir || '').trim();
+  if (!dir) {
+    try {
+      const settings = await ipcRenderer.invoke('get-bk-settings');
+      dir = String(settings?.dir || '').trim();
+    } catch (e) {}
+  }
+  if (dir) {
+    document.getElementById('dir').value = dir;
+  }
+
+  const modeName = mode === 'amigo' ? 'Amigo' : mode === 'va' ? 'VA' : '普通';
+  log(`已从网页载入 ${urls.length} 条链接，模式：${modeName}`);
+  if (job.autoStart && dir && urls.length) {
+    document.getElementById('start').click();
+  } else if (!dir) {
+    log('未设置保存目录，选择目录后点「开始抓取」');
+  }
+}
+
+applyLaunchJob();
+ipcRenderer.on('launch-job-ready', () => {
+  applyLaunchJob();
+});
+</script>
+
+</body>
+
+</html>

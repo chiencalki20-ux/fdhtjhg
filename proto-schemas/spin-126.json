@@ -1,0 +1,158 @@
+{
+  "source": "Protoutils field meta in 126/assets/main/index.38a8f.js",
+  "game": "ft-multiplier",
+  "displayName": "FTMultiplier",
+  "staticId": "126",
+  "apiPathIncludes": "/game-api/ft-multiplier/",
+  "apiPathIncludesAny": [
+    "/game-api/ft-multiplier/"
+  ],
+  "staticPathIncludes": "/126/",
+  "decorator": "(name, fieldId, type, repeated, packed, flag3, mapKeyType?)",
+  "fields": [
+    {
+      "name": "ml",
+      "id": 51,
+      "type": "int32",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "cs",
+      "id": 52,
+      "type": "float",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "rl",
+      "id": 53,
+      "type": "int32",
+      "repeated": true,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": null,
+      "id": 54,
+      "type": "float",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": null,
+      "id": 55,
+      "type": "int32",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": null,
+      "id": 56,
+      "type": "int32",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": true
+    },
+    {
+      "name": null,
+      "id": 57,
+      "type": "int32",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": null,
+      "id": 58,
+      "type": "string",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": null,
+      "id": 59,
+      "type": "string",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "fb",
+      "id": 60,
+      "type": "int32",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": null,
+      "id": 71,
+      "type": "uint64",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "wp",
+      "id": 101,
+      "type": "message",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": true
+    },
+    {
+      "name": "lw",
+      "id": 102,
+      "type": "float",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": true
+    },
+    {
+      "name": "wc",
+      "id": 103,
+      "type": "int32",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": true
+    },
+    {
+      "name": null,
+      "id": 104,
+      "type": "int32",
+      "repeated": true,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": null,
+      "id": 105,
+      "type": "int32",
+      "repeated": true,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": null,
+      "id": 106,
+      "type": "int32",
+      "repeated": true,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": null,
+      "id": 108,
+      "type": "int32",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    }
+  ]
+}

@@ -1,0 +1,130 @@
+[
+  {
+    "id": "common",
+    "game": "pg-v4-spin-common",
+    "file": "pg-v4-spin-common.json",
+    "fields": 39,
+    "note": "fallback for all /game-api/*/v4/*"
+  },
+  {
+    "id": "68",
+    "game": "setting-menu",
+    "displayName": "SettingMenu",
+    "file": "spin-68.json",
+    "fields": 17,
+    "apiHints": [
+      "/game-api/setting-menu/"
+    ]
+  },
+  {
+    "id": "98",
+    "game": "fortune-ox",
+    "displayName": "FortuneOx",
+    "file": "spin-98.json",
+    "fields": 24,
+    "apiHints": [
+      "/game-api/fortune-ox/"
+    ]
+  },
+  {
+    "id": "104",
+    "game": "wild-bandito",
+    "displayName": "WildBandito",
+    "file": "spin-104.json",
+    "fields": 23,
+    "apiHints": [
+      "/game-api/wild-bandito/"
+    ]
+  },
+  {
+    "id": "126",
+    "game": "ft-multiplier",
+    "displayName": "FTMultiplier",
+    "file": "spin-126.json",
+    "fields": 18,
+    "apiHints": [
+      "/game-api/ft-multiplier/"
+    ]
+  },
+  {
+    "id": "135",
+    "game": "wild-bounty-sd",
+    "displayName": "WildBountyShowdown",
+    "file": "spin-135.json",
+    "fields": 29,
+    "apiHints": [
+      "/game-api/wild-bounty-sd/",
+      "/game-api/wild-bounty-showdown/"
+    ]
+  },
+  {
+    "id": "1451122",
+    "game": "dragon-hatch2",
+    "displayName": "DragonHatch2",
+    "file": "spin-1451122.json",
+    "fields": 23,
+    "apiHints": [
+      "/game-api/dragon-hatch2/"
+    ]
+  },
+  {
+    "id": "1492288",
+    "game": "setting-menu",
+    "displayName": "SettingMenu",
+    "file": "spin-1492288.json",
+    "fields": 27,
+    "apiHints": [
+      "/game-api/setting-menu/"
+    ]
+  },
+  {
+    "id": "1543462",
+    "game": "fortune-rabbit",
+    "displayName": "FortuneRabbit",
+    "file": "spin-1543462.json",
+    "fields": 24,
+    "apiHints": [
+      "/game-api/fortune-rabbit/"
+    ]
+  },
+  {
+    "id": "1695365",
+    "game": "pop-out-symbol-desc",
+    "displayName": "PopOutSymbolDesc",
+    "file": "spin-1695365.json",
+    "fields": 22,
+    "apiHints": [
+      "/game-api/pop-out-symbol-desc/"
+    ]
+  },
+  {
+    "id": "2009635",
+    "game": "poker-kingdom-win",
+    "displayName": "PokerKingdomWin",
+    "file": "spin-2009635.json",
+    "fields": 24,
+    "apiHints": [
+      "/game-api/poker-kingdom-win/"
+    ]
+  },
+  {
+    "id": "2012025",
+    "game": "skylight-wonders-rule",
+    "displayName": "SkylightWondersRule",
+    "file": "spin-2012025.json",
+    "fields": 0,
+    "apiHints": [
+      "/game-api/skylight-wonders-rule/"
+    ]
+  },
+  {
+    "id": "2100928",
+    "game": "fortune-horse",
+    "displayName": "FortuneHorse",
+    "file": "spin-2100928.json",
+    "fields": 22,
+    "apiHints": [
+      "/game-api/fortune-horse/"
+    ]
+  }
+]

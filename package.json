@@ -1,0 +1,49 @@
+{
+  "name": "pg-node",
+  "version": "4.0.7",
+  "main": "main.js",
+  "description": "PG Crawler Desktop Tool",
+  "author": "BK",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder",
+    "dist:mac": "electron-builder --mac"
+  },
+  "build": {
+    "appId": "com.pg.crawler",
+    "productName": "BK Game Tool",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*"
+    ],
+    "asar": true,
+    "asarUnpack": [
+      "node_modules/playwright/**/*",
+      "node_modules/playwright-core/**/*"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.developer-tools"
+    }
+  },
+  "dependencies": {
+    "jimp": "^1.6.1",
+    "opencv-wasm": "^4.3.0-10",
+    "playwright": "^1.59.1"
+  },
+  "optionalDependencies": {
+    "dmg-license": "^1.0.11"
+  },
+  "devDependencies": {
+    "electron": "^41.2.1",
+    "electron-builder": "^26.8.1"
+  }
+}

@@ -1,0 +1,322 @@
+{
+  "source": "union of extracted PG v4 Spin field roles (static packs)",
+  "game": "pg-v4-spin-common",
+  "genericPgV4Spin": true,
+  "apiPathIncludes": "/game-api/",
+  "matchGameApiV4": true,
+  "decorator": "(name, fieldId, type, repeated, packed, flag3, mapKeyType?)",
+  "fields": [
+    {
+      "name": "mt",
+      "id": 1,
+      "type": "int32",
+      "repeated": true,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "ms",
+      "id": 2,
+      "type": "float",
+      "repeated": true,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "mi",
+      "id": 3,
+      "type": "int32",
+      "repeated": true,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "aw",
+      "id": 6,
+      "type": "float",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "cs",
+      "id": 11,
+      "type": "float",
+      "repeated": true,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "ml",
+      "id": 12,
+      "type": "int32",
+      "repeated": true,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "tw",
+      "id": 17,
+      "type": "float",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "wt",
+      "id": 22,
+      "type": "string",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "ml",
+      "id": 51,
+      "type": "int32",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "cs",
+      "id": 52,
+      "type": "float",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "rl",
+      "id": 53,
+      "type": "int32",
+      "repeated": true,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": null,
+      "id": 54,
+      "type": "float",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": null,
+      "id": 55,
+      "type": "int32",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": null,
+      "id": 56,
+      "type": "int32",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": true
+    },
+    {
+      "name": null,
+      "id": 57,
+      "type": "int32",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": null,
+      "id": 58,
+      "type": "string",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": null,
+      "id": 59,
+      "type": "string",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "fb",
+      "id": 60,
+      "type": "int32",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": null,
+      "id": 71,
+      "type": "uint64",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": null,
+      "id": 74,
+      "type": "int32",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "wp",
+      "id": 101,
+      "type": "message",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": true
+    },
+    {
+      "name": "lw",
+      "id": 102,
+      "type": "float",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": true
+    },
+    {
+      "name": "rf",
+      "id": 103,
+      "type": "int32",
+      "repeated": true,
+      "packed": false,
+      "mapKeyInt32": true
+    },
+    {
+      "name": "cp",
+      "id": 104,
+      "type": "int32",
+      "repeated": true,
+      "packed": false,
+      "mapKeyInt32": true
+    },
+    {
+      "name": "ir",
+      "id": 105,
+      "type": "int32",
+      "repeated": true,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "rc",
+      "id": 106,
+      "type": "int32",
+      "repeated": true,
+      "packed": false,
+      "mapKeyInt32": true
+    },
+    {
+      "name": "im",
+      "id": 107,
+      "type": "message",
+      "repeated": true,
+      "packed": false,
+      "mapKeyInt32": true
+    },
+    {
+      "name": "sc",
+      "id": 108,
+      "type": "int32",
+      "repeated": true,
+      "packed": false,
+      "mapKeyInt32": true
+    },
+    {
+      "name": "wc",
+      "id": 109,
+      "type": "int32",
+      "repeated": true,
+      "packed": false,
+      "mapKeyInt32": true
+    },
+    {
+      "name": "mf",
+      "id": 110,
+      "type": "int32",
+      "repeated": true,
+      "packed": false,
+      "mapKeyInt32": true
+    },
+    {
+      "name": "rs",
+      "id": 111,
+      "type": "int32",
+      "repeated": true,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "fs",
+      "id": 112,
+      "type": "int32",
+      "repeated": true,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": null,
+      "id": 113,
+      "type": "message",
+      "repeated": true,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "sc",
+      "id": 114,
+      "type": "int32",
+      "repeated": true,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": null,
+      "id": 115,
+      "type": "float",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "fs",
+      "id": 116,
+      "type": "unknown",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": null,
+      "id": 117,
+      "type": "float",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": null,
+      "id": 118,
+      "type": "float",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "fs",
+      "id": 119,
+      "type": "unknown",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    }
+  ]
+}

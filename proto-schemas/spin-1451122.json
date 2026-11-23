@@ -1,0 +1,198 @@
+{
+  "source": "Protoutils field meta in 1451122/assets/main/index.d359f.js",
+  "game": "dragon-hatch2",
+  "displayName": "DragonHatch2",
+  "staticId": "1451122",
+  "apiPathIncludes": "/game-api/dragon-hatch2/",
+  "apiPathIncludesAny": [
+    "/game-api/dragon-hatch2/"
+  ],
+  "staticPathIncludes": "/1451122/",
+  "decorator": "(name, fieldId, type, repeated, packed, flag3, mapKeyType?)",
+  "fields": [
+    {
+      "name": "cs",
+      "id": 11,
+      "type": "float",
+      "repeated": true,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "ml",
+      "id": 12,
+      "type": "int32",
+      "repeated": true,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "wt",
+      "id": 22,
+      "type": "string",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "ml",
+      "id": 51,
+      "type": "int32",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "cs",
+      "id": 52,
+      "type": "float",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "rl",
+      "id": 53,
+      "type": "int32",
+      "repeated": true,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": null,
+      "id": 54,
+      "type": "float",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": null,
+      "id": 55,
+      "type": "int32",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": null,
+      "id": 56,
+      "type": "int32",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": true
+    },
+    {
+      "name": null,
+      "id": 57,
+      "type": "int32",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": null,
+      "id": 58,
+      "type": "string",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": null,
+      "id": 59,
+      "type": "string",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "fb",
+      "id": 60,
+      "type": "int32",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": null,
+      "id": 71,
+      "type": "uint64",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "wp",
+      "id": 101,
+      "type": "message",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": true
+    },
+    {
+      "name": "cp",
+      "id": 104,
+      "type": "int32",
+      "repeated": true,
+      "packed": false,
+      "mapKeyInt32": true
+    },
+    {
+      "name": null,
+      "id": 106,
+      "type": "int32",
+      "repeated": true,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": null,
+      "id": 107,
+      "type": "message",
+      "repeated": true,
+      "packed": false,
+      "mapKeyInt32": true
+    },
+    {
+      "name": null,
+      "id": 108,
+      "type": "int32",
+      "repeated": true,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "df",
+      "id": 109,
+      "type": "int32",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": null,
+      "id": 110,
+      "type": "int32",
+      "repeated": true,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": null,
+      "id": 111,
+      "type": "int32",
+      "repeated": true,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": null,
+      "id": 112,
+      "type": "int32",
+      "repeated": true,
+      "packed": false,
+      "mapKeyInt32": false
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "source": "Protoutils field meta in 2012025/assets/main/index.02c65.js",
+  "game": "skylight-wonders-rule",
+  "displayName": "SkylightWondersRule",
+  "staticId": "2012025",
+  "apiPathIncludes": "/game-api/skylight-wonders-rule/",
+  "apiPathIncludesAny": [
+    "/game-api/skylight-wonders-rule/"
+  ],
+  "staticPathIncludes": "/2012025/",
+  "decorator": "(name, fieldId, type, repeated, packed, flag3, mapKeyType?)",
+  "fields": []
+}
