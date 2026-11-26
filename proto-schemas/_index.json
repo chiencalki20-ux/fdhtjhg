@@ -126,5 +126,60 @@
     "apiHints": [
       "/game-api/fortune-horse/"
     ]
+  },
+  {
+    "id": "87",
+    "game": "treasures-of-aztec",
+    "displayName": "TreasuresAztec",
+    "file": "spin-87.json",
+    "fields": 35,
+    "apiHints": [
+      "/game-api/treasures-of-aztec/"
+    ],
+    "note": "precise; also matched by page URL /<staticId>/"
+  },
+  {
+    "id": "1615454",
+    "game": "werewolf-hunt",
+    "displayName": "WerewolfHunt",
+    "file": "spin-1615454.json",
+    "fields": 26,
+    "apiHints": [
+      "/game-api/werewolf-hunt/"
+    ],
+    "note": "precise; also matched by page URL /<staticId>/"
+  },
+  {
+    "id": "1671262",
+    "game": "genstones-gold",
+    "displayName": "GemstonesGold",
+    "file": "spin-1671262.json",
+    "fields": 21,
+    "apiHints": [
+      "/game-api/genstones-gold/"
+    ],
+    "note": "precise; also matched by page URL /<staticId>/"
+  },
+  {
+    "id": "1760238",
+    "game": "yakuza-honor",
+    "displayName": "YakuzaHonor",
+    "file": "spin-1760238.json",
+    "fields": 27,
+    "apiHints": [
+      "/game-api/yakuza-honor/"
+    ],
+    "note": "precise; also matched by page URL /<staticId>/"
+  },
+  {
+    "id": "1799745",
+    "game": "mr-treas-fort",
+    "displayName": "MrTreasFort",
+    "file": "spin-1799745.json",
+    "fields": 23,
+    "apiHints": [
+      "/game-api/mr-treas-fort/"
+    ],
+    "note": "precise; also matched by page URL /<staticId>/"
   }
 ]

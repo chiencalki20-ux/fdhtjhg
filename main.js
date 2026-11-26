@@ -65,15 +65,24 @@ ipcMain.handle('save-bk-settings', (_event, data) => {
   return next;
 });
 
-ipcMain.handle('consume-launch-job', () => {
-  try {
-    const job = JSON.parse(fs.readFileSync(LAUNCH_FILE, 'utf8'));
-    fs.unlinkSync(LAUNCH_FILE);
-    return job;
-  } catch {
-    return null;
+function consumeLaunchJob() {
+  const files = [
+    path.join(process.env.LOCALAPPDATA || '', 'templates-manager', 'launch-job.json'),
+    LAUNCH_FILE,
+  ];
+  for (const file of files) {
+    try {
+      const job = JSON.parse(fs.readFileSync(file, 'utf8'));
+      fs.unlinkSync(file);
+      return job;
+    } catch {
+      // 这份不存在或还没写完，继续看下一份
+    }
   }
-});
+  return null;
+}
+
+ipcMain.handle('consume-launch-job', () => consumeLaunchJob());
 
 ipcMain.handle('start-multi', async (event, data) => {
   await runMultiCrawler(data);

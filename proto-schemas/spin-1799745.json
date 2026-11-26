@@ -1,0 +1,370 @@
+{
+  "source": "Protoutils classes (deobfuscated) in 1799745/assets/main/index.66113.js",
+  "game": "mr-treas-fort",
+  "displayName": "MrTreasFort",
+  "staticId": "1799745",
+  "matchPageGameId": true,
+  "apiPathIncludes": "/game-api/mr-treas-fort/",
+  "apiPathIncludesAny": [
+    "/game-api/mr-treas-fort/"
+  ],
+  "message": "SlotCommonResponse",
+  "decorator": "(name, fieldId, type, repeated, packed, optional, mapKeyType?)",
+  "fields": [
+    {
+      "name": "ml",
+      "id": 51,
+      "type": "int32",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "cs",
+      "id": 52,
+      "type": "double",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "rl",
+      "id": 53,
+      "type": "int32",
+      "repeated": true,
+      "packed": true,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "ctw",
+      "id": 54,
+      "type": "double",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "cwc",
+      "id": 55,
+      "type": "int32",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "fstc",
+      "id": 56,
+      "type": "int32",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": true
+    },
+    {
+      "name": "pcwc",
+      "id": 57,
+      "type": "int32",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "rwsp",
+      "id": 58,
+      "type": "string",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "hashr",
+      "id": 59,
+      "type": "string",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "fb",
+      "id": 60,
+      "type": "message",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false,
+      "messageType": "optional int32",
+      "messageSchema": {
+        "message": "optional int32",
+        "fields": [
+          {
+            "name": null,
+            "id": 1,
+            "type": "int32",
+            "repeated": false,
+            "packed": false,
+            "mapKeyInt32": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "gwt",
+      "id": 71,
+      "type": "int32",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "wp",
+      "id": 101,
+      "type": "message",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": true,
+      "messageType": "Int32ListCollection"
+    },
+    {
+      "name": "lw",
+      "id": 102,
+      "type": "double",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": true
+    },
+    {
+      "name": "fs",
+      "id": 104,
+      "type": "message",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false,
+      "messageType": "MrTreasFortFreeSpin",
+      "messageSchema": {
+        "message": "MrTreasFortFreeSpin",
+        "fields": [
+          {
+            "name": "s",
+            "id": 1,
+            "type": "int32",
+            "repeated": false,
+            "packed": false,
+            "mapKeyInt32": false
+          },
+          {
+            "name": "ts",
+            "id": 2,
+            "type": "int32",
+            "repeated": false,
+            "packed": false,
+            "mapKeyInt32": false
+          },
+          {
+            "name": "aw",
+            "id": 3,
+            "type": "double",
+            "repeated": false,
+            "packed": false,
+            "mapKeyInt32": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "sw",
+      "id": 106,
+      "type": "message",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": true,
+      "messageType": "DoubleList",
+      "messageSchema": {
+        "message": "DoubleList",
+        "fields": [
+          {
+            "name": null,
+            "id": 1,
+            "type": "double",
+            "repeated": true,
+            "packed": true,
+            "mapKeyInt32": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "wpl",
+      "id": 107,
+      "type": "int32",
+      "repeated": true,
+      "packed": true,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "gm",
+      "id": 108,
+      "type": "int32",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "rm",
+      "id": 109,
+      "type": "int32",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": true
+    },
+    {
+      "name": "imw",
+      "id": 110,
+      "type": "bool",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "izt",
+      "id": 111,
+      "type": "bool",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "ssaw",
+      "id": 112,
+      "type": "double",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false
+    },
+    {
+      "name": "rns",
+      "id": 113,
+      "type": "message",
+      "repeated": true,
+      "packed": false,
+      "mapKeyInt32": false,
+      "messageType": "Int32List",
+      "messageSchema": {
+        "message": "Int32List",
+        "fields": [
+          {
+            "name": null,
+            "id": 1,
+            "type": "int32",
+            "repeated": true,
+            "packed": true,
+            "mapKeyInt32": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "gi",
+      "id": 900,
+      "type": "message",
+      "repeated": false,
+      "packed": false,
+      "mapKeyInt32": false,
+      "messageType": "SlotGameInfoResponse",
+      "messageSchema": {
+        "message": "SlotGameInfoResponse",
+        "fields": [
+          {
+            "name": "cs",
+            "id": 11,
+            "type": "double",
+            "repeated": true,
+            "packed": true,
+            "mapKeyInt32": false
+          },
+          {
+            "name": "ml",
+            "id": 12,
+            "type": "int32",
+            "repeated": true,
+            "packed": true,
+            "mapKeyInt32": false
+          },
+          {
+            "name": "mxl",
+            "id": 13,
+            "type": "int32",
+            "repeated": false,
+            "packed": false,
+            "mapKeyInt32": false
+          },
+          {
+            "name": "wt",
+            "id": 22,
+            "type": "message",
+            "repeated": false,
+            "packed": false,
+            "mapKeyInt32": false,
+            "messageType": "WinThreshold",
+            "messageSchema": {
+              "message": "WinThreshold",
+              "fields": [
+                {
+                  "name": "mw",
+                  "id": 1,
+                  "type": "double",
+                  "repeated": false,
+                  "packed": false,
+                  "mapKeyInt32": false
+                },
+                {
+                  "name": "bw",
+                  "id": 2,
+                  "type": "double",
+                  "repeated": false,
+                  "packed": false,
+                  "mapKeyInt32": false
+                },
+                {
+                  "name": "mgw",
+                  "id": 3,
+                  "type": "double",
+                  "repeated": false,
+                  "packed": false,
+                  "mapKeyInt32": false
+                },
+                {
+                  "name": "smgw",
+                  "id": 4,
+                  "type": "double",
+                  "repeated": false,
+                  "packed": false,
+                  "mapKeyInt32": false
+                }
+              ]
+            }
+          },
+          {
+            "name": "maxwm",
+            "id": 23,
+            "type": "message",
+            "repeated": false,
+            "packed": false,
+            "mapKeyInt32": false,
+            "messageType": "optional int32",
+            "messageSchema": {
+              "message": "optional int32",
+              "fields": [
+                {
+                  "name": null,
+                  "id": 1,
+                  "type": "int32",
+                  "repeated": false,
+                  "packed": false,
+                  "mapKeyInt32": false
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

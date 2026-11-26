@@ -4,17 +4,42 @@
  */
 const fs = require('fs');
 const path = require('path');
+const { extractProtoClasses } = require('./pg-proto-classes');
 
-const STATIC_ROOT = 'c:/Users/User/Desktop/projet/game_resource/pg-v4/pg-static-v4';
+const STATIC_ROOTS = [
+  'c:/Users/User/Desktop/projet/game_resource/pg-v4/pg-static-v4',
+  'c:/Users/User/Desktop/projet/game_resource/pg-v4/pg-static-v4-2'
+];
 const OUT_DIR = path.join(__dirname, '..', 'proto-schemas');
 const GAME_IDS = [
   '68', '98', '104', '126', '135', '1451122', '1492288',
   '1543462', '1695365', '2009635', '2012025', '2100928'
 ];
+/** 解混淆后按源码 proto 类精确生成（顶层 + GameInfo + 嵌套子消息），不参与 common 合并 */
+const PRECISE_GAME_IDS = ['87', '1615454', '1671262', '1760238', '1799745'];
 
 /** 已知 staticId → API slug（HAR/线上验证过的优先） */
 const KNOWN_API_SLUGS = {
-  '135': 'wild-bounty-sd'
+  '135': 'wild-bounty-sd',
+  '87': 'treasures-of-aztec',
+  '1671262': 'genstones-gold'
+};
+
+const SCALAR_TYPES = new Set([
+  'int32', 'int64', 'uint32', 'uint64', 'sint32', 'sint64',
+  'fixed32', 'fixed64', 'sfixed32', 'sfixed64',
+  'float', 'double', 'bool', 'string', 'bytes'
+]);
+
+/**
+ * 框架内置类型（定义在加密的框架包里，读不到源码）。
+ * Int32List：135 线上数据 wp 值为 {"f1":[0,6,8,11]}，即 f1 = packed int32。
+ * DoubleList：同一套 *List 包装约定，f1 = packed double。
+ * Int32ListCollection / FeatureBuy 无可核对数据，不定内层结构。
+ */
+const BUILTIN_MESSAGES = {
+  Int32List: [{ name: null, id: 1, type: 'int32', repeated: true, packed: true, mapKey: null }],
+  DoubleList: [{ name: null, id: 1, type: 'double', repeated: true, packed: true, mapKey: null }]
 };
 
 function classifyType(expr) {
@@ -178,6 +203,110 @@ function mergeFieldUnion(schemas) {
   return refineTypes([...byId.values()]);
 }
 
+function findGameDir(id) {
+  for (const root of STATIC_ROOTS) {
+    const dir = path.join(root, id);
+    if (fs.existsSync(dir)) return dir;
+  }
+  return null;
+}
+
+/** 同名类（框架基类 + 游戏扩展）合并：含 baseId 的为基类，扩展类同号字段覆盖基类 */
+function mergeClassFields(list, baseId) {
+  const base = list.filter(c => c.fields.some(f => f.id === baseId));
+  const ext = list.filter(c => !base.includes(c));
+  const byId = new Map();
+  for (const c of [...base, ...ext]) {
+    for (const f of c.fields) byId.set(f.id, f);
+  }
+  return [...byId.values()].sort((a, b) => a.id - b.id);
+}
+
+function toSchemaFields(rawFields, classesByName, depth) {
+  return rawFields.map(f => {
+    let type = f.type;
+    // 源码声明为 bytes，但由 WinThreshold 反序列化器解码
+    if (f.name === 'wt' && type === 'bytes' && classesByName.has('WinThreshold')) type = 'WinThreshold';
+    const scalar = SCALAR_TYPES.has(type);
+    // optional 标量线上是包装消息 {f1: value}（GameInfo maxwm 实测 08 88 27 → {"f1":5000}）
+    const wrapped = scalar && f.optional && !f.repeated && !f.mapKey;
+    const out = {
+      name: f.name,
+      id: f.id,
+      type: scalar && !wrapped ? type : 'message',
+      repeated: f.repeated,
+      packed: f.packed || (f.repeated && scalar && type !== 'string' && type !== 'bytes'),
+      mapKeyInt32: f.mapKey === 'int32'
+    };
+    if (f.mapKey && f.mapKey !== 'int32') out.mapKeyType = f.mapKey;
+    if (wrapped) {
+      out.messageType = `optional ${type}`;
+      out.messageSchema = {
+        message: `optional ${type}`,
+        fields: [{ name: null, id: 1, type, repeated: false, packed: false, mapKeyInt32: false }]
+      };
+    } else if (!scalar) {
+      out.messageType = type;
+      const sub = resolveMessageSchema(type, classesByName, depth + 1);
+      if (sub) out.messageSchema = sub;
+    }
+    return out;
+  });
+}
+
+function resolveMessageSchema(name, classesByName, depth) {
+  if (depth > 8) return null;
+  const raw = BUILTIN_MESSAGES[name] || (classesByName.has(name) ? mergeClassFields(classesByName.get(name), -1) : null);
+  if (!raw) return null;
+  return { message: name, fields: toSchemaFields(raw, classesByName, depth) };
+}
+
+function buildPreciseSchema(id, gameDir, mainJs, text) {
+  const classes = extractProtoClasses(text);
+  if (!classes || !classes.length) throw new Error('no proto classes');
+  const classesByName = new Map();
+  for (const c of classes) {
+    if (!classesByName.has(c.name)) classesByName.set(c.name, []);
+    classesByName.get(c.name).push(c);
+  }
+  if (!classesByName.has('SlotCommonResponse')) throw new Error('SlotCommonResponse missing');
+
+  const prefixClass = classes.find(c => /(FreeSpin|BetRequest)$/.test(c.name));
+  const displayName = prefixClass ? prefixClass.name.replace(/(FreeSpin|BetRequest)$/, '') : null;
+  const slug = KNOWN_API_SLUGS[id] || (displayName ? pascalToKebab(displayName) : `game-${id}`);
+
+  const spinFields = toSchemaFields(mergeClassFields(classesByName.get('SlotCommonResponse'), 53), classesByName, 0);
+  // GameInfo 响应顶层同 Spin（上一局结果），游戏配置嵌在 f900（线上实测）
+  if (classesByName.has('SlotGameInfoResponse')) {
+    spinFields.push({
+      name: 'gi',
+      id: 900,
+      type: 'message',
+      repeated: false,
+      packed: false,
+      mapKeyInt32: false,
+      messageType: 'SlotGameInfoResponse',
+      messageSchema: {
+        message: 'SlotGameInfoResponse',
+        fields: toSchemaFields(mergeClassFields(classesByName.get('SlotGameInfoResponse'), 11), classesByName, 0)
+      }
+    });
+  }
+
+  return {
+    source: `Protoutils classes (deobfuscated) in ${path.relative(path.dirname(gameDir), mainJs).replace(/\\/g, '/')}`,
+    game: slug,
+    displayName,
+    staticId: id,
+    matchPageGameId: true,
+    apiPathIncludes: `/game-api/${slug}/`,
+    apiPathIncludesAny: [`/game-api/${slug}/`],
+    message: 'SlotCommonResponse',
+    decorator: '(name, fieldId, type, repeated, packed, optional, mapKeyType?)',
+    fields: spinFields
+  };
+}
+
 function main() {
   fs.mkdirSync(OUT_DIR, { recursive: true });
   const extracted = [];
@@ -185,19 +314,23 @@ function main() {
 
   for (const id of GAME_IDS) {
     const t0 = Date.now();
-    const gameDir = path.join(STATIC_ROOT, id);
+    const gameDir = findGameDir(id);
+    if (!gameDir) {
+      console.log(`[skip] ${id}: static dir missing`);
+      continue;
+    }
     const mainJs = findMainJs(gameDir);
     if (!mainJs) {
       console.log(`[skip] ${id}: no main js`);
       continue;
     }
     const text = fs.readFileSync(mainJs, 'utf8');
-    let fields = refineTypes(extractSpinFields(text));
+    const fields = refineTypes(extractSpinFields(text));
     const displayName = detectDisplayName(gameDir);
     const slugGuess = displayName ? pascalToKebab(displayName) : null;
     const slug = KNOWN_API_SLUGS[id] || null;
     const game = slug || slugGuess || `game-${id}`;
-    const relSource = path.relative(STATIC_ROOT, mainJs).replace(/\\/g, '/');
+    const relSource = path.relative(path.dirname(gameDir), mainJs).replace(/\\/g, '/');
 
     const apiHints = [];
     if (slug) apiHints.push(`/game-api/${slug}/`);
@@ -226,6 +359,34 @@ function main() {
       apiHints
     });
     console.log(`[ok] ${id} ${displayName || '-'} fields=${fields.length} ${Date.now() - t0}ms`);
+  }
+
+  for (const id of PRECISE_GAME_IDS) {
+    const gameDir = findGameDir(id);
+    const mainJs = gameDir && findMainJs(gameDir);
+    if (!mainJs) {
+      console.log(`[skip] ${id}: static dir or main js missing`);
+      continue;
+    }
+    let schema;
+    try {
+      schema = buildPreciseSchema(id, gameDir, mainJs, fs.readFileSync(mainJs, 'utf8'));
+    } catch (e) {
+      console.log(`[fail] ${id}: ${e.message}`);
+      continue;
+    }
+    const outName = `spin-${id}.json`;
+    fs.writeFileSync(path.join(OUT_DIR, outName), JSON.stringify(schema, null, 2));
+    index.push({
+      id,
+      game: schema.game,
+      displayName: schema.displayName,
+      file: outName,
+      fields: schema.fields.length,
+      apiHints: schema.apiPathIncludesAny,
+      note: 'precise; also matched by page URL /<staticId>/'
+    });
+    console.log(`[precise] ${id} ${schema.displayName} slug=${schema.game} fields=${schema.fields.length}`);
   }
 
   const commonFields = mergeFieldUnion(extracted.filter(s => s.fields.length));

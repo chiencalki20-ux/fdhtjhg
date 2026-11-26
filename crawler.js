@@ -273,7 +273,7 @@ function mightBeApiResponse(contentType, resourceType, url, apiPatterns) {
   return false;
 }
 
-async function saveApiToDisk(saveDir, url, buffer, contentType, resourceType, apiPatterns) {
+async function saveApiToDisk(saveDir, url, buffer, contentType, resourceType, apiPatterns, pageUrl) {
   const ct = (contentType || '').toLowerCase();
   const isAjax = resourceType === 'xhr' || resourceType === 'fetch';
   const isJsonType =
@@ -299,7 +299,7 @@ async function saveApiToDisk(saveDir, url, buffer, contentType, resourceType, ap
   let kind = 'json';
   if (isOctetStream) {
     apiText = parseAsProtobuf
-      ? parseOctetStream(buffer, url)
+      ? parseOctetStream(buffer, url, pageUrl)
       : buffer.toString('utf8');
     kind = 'octet-stream';
   } else if (!isStaticUrl && isJsonType) {
@@ -484,7 +484,23 @@ function isProtoWideIntType(type) {
   return type === 'int64' || type === 'uint64' || type === 'sint64';
 }
 
-/** map 条目固定为 message{ f1=key, f2=value }，value 类型取自父字段 meta.type */
+const TWO_POW_63 = 1n << 63n;
+const TWO_POW_64 = 1n << 64n;
+
+/** int32/int64 负数在 wire 上是 ≥2^63 的 10 字节 varint（如 -1 → 18446744073709551615） */
+function toSignedVarint(val) {
+  if (typeof val !== 'string') return val;
+  const big = BigInt(val);
+  if (big < TWO_POW_63) return val;
+  const signed = big - TWO_POW_64;
+  return signed >= BigInt(Number.MIN_SAFE_INTEGER) ? Number(signed) : signed.toString();
+}
+
+function isProtoSignedIntType(type) {
+  return type === 'int32' || type === 'int64';
+}
+
+/** map 条目固定为 message{ f1=key, f2=value }，value 类型（含子 message schema）取自父字段 meta */
 function mapEntrySchema(meta) {
   return {
     fields: [
@@ -494,7 +510,8 @@ function mapEntrySchema(meta) {
         type: meta && meta.type ? meta.type : 'unknown',
         repeated: false,
         packed: false,
-        mapKeyInt32: false
+        mapKeyInt32: false,
+        messageSchema: (meta && meta.messageSchema) || null
       }
     ]
   };
@@ -510,6 +527,7 @@ function schemaFieldMap(schema) {
 /** wire=0 整型：int64/uint64 一律字符串，避免精度/类型抖动 */
 function coerceVarintByMeta(val, meta) {
   if (!meta) return val;
+  if (isProtoSignedIntType(meta.type)) val = toSignedVarint(val);
   if (isProtoWideIntType(meta.type) && typeof val === 'number') return String(val);
   if (meta.type === 'bool') return val === 1 || val === '1' || val === true;
   if (meta.type === 'float' || meta.type === 'double') {
@@ -616,10 +634,23 @@ function decodeLengthDelimitedValue(slice, meta) {
     (meta.repeated || meta.packed);
   const preferMessage =
     meta && (meta.type === 'message' || meta.mapKeyInt32 === true);
+  if (preferMessage && slice.length === 0) return {};
+
+  if (
+    meta &&
+    meta.type === 'double' &&
+    !meta.mapKeyInt32 &&
+    (meta.repeated || meta.packed) &&
+    slice.length % 8 === 0
+  ) {
+    const doubles = [];
+    for (let p = 0; p < slice.length; p += 8) doubles.push(new PbFloat(slice.readDoubleLE(p)));
+    return doubles;
+  }
 
   if (preferPacked) {
     const packed = tryDecodePackedVarints(slice);
-    if (packed) return packed;
+    if (packed) return isProtoSignedIntType(meta.type) ? packed.map(toSignedVarint) : packed;
   }
 
   // map：用 {f1:key,f2:value} 条目 schema，保证 value 侧 float/int/message 类型准确
@@ -724,9 +755,22 @@ const PROTO_SCHEMAS = [];
   }
 })();
 
-function resolveProtoSchema(url) {
+/** 页面地址 .../<游戏ID>/index.html 中的游戏 ID */
+function pageGameId(pageUrl) {
+  const m = /\/(\d+)\/index\.html/i.exec(String(pageUrl || ''));
+  return m ? m[1] : null;
+}
+
+function resolveProtoSchema(url, pageUrl) {
   if (!url || !PROTO_SCHEMAS.length) return null;
   const u = String(url);
+
+  // 0) 按页面游戏 ID（slug 由服务端下发，源码里没有）
+  const gid = pageGameId(pageUrl);
+  if (gid && u.includes('/game-api/')) {
+    const s = PROTO_SCHEMAS.find(x => x.matchPageGameId && String(x.staticId) === gid);
+    if (s) return s;
+  }
 
   // 1) 精确：apiPathIncludes / apiPathIncludesAny
   for (const s of PROTO_SCHEMAS) {
@@ -776,14 +820,14 @@ function applyProtoSchema(decoded, schema) {
   return decoded;
 }
 
-function parseOctetStream(buffer, url) {
+function parseOctetStream(buffer, url, pageUrl) {
   let data = buffer;
   try {
     data = zlib.gunzipSync(buffer);
   } catch (e) { }
 
   const candidates = data === buffer ? [buffer] : [data, buffer];
-  const schema = resolveProtoSchema(url);
+  const schema = resolveProtoSchema(url, pageUrl);
 
   for (const candidate of candidates) {
     const text = candidate.toString('utf8');
@@ -1043,12 +1087,16 @@ module.exports = async function (
     const copy = Buffer.from(buffer || []);
     if (!copy.length) return;
     noteResourceUrl(url);
+    let pageUrl = '';
+    try {
+      if (page && !page.isClosed()) pageUrl = page.url();
+    } catch (_) { }
     enqueueWindowApiJob(EFFECTIVE_SAVE_DIR, () =>
-      persistCapture(url, copy, contentType, resourceType)
+      persistCapture(url, copy, contentType, resourceType, pageUrl)
     );
   }
 
-  async function persistCapture(url, buffer, contentType, resourceType) {
+  async function persistCapture(url, buffer, contentType, resourceType, pageUrl) {
     try {
       const saved = await saveApiToDisk(
         EFFECTIVE_SAVE_DIR,
@@ -1056,7 +1104,8 @@ module.exports = async function (
         buffer,
         contentType,
         resourceType,
-        apiPatterns
+        apiPatterns,
+        pageUrl
       );
       if (saved) {
         apiSet.add(url);

@@ -1559,7 +1559,32 @@ async () => {
   let windowCount = 1;
   let regionClick = null;
 
-  if (crawlMode === 'amigo') {
+  // 网页启动只带入已经取好的链接，用来确认模式，不改成桌面端自动取链
+  const givenUrls = Array.isArray(window.__bkLaunchUrls)
+    ? window.__bkLaunchUrls.map(u => String(u).trim()).filter(u => /^https?:\/\//i.test(u))
+    : [];
+  const fromPage = givenUrls.length > 0;
+  if (fromPage) window.__bkLaunchUrls = null;
+
+  if (givenUrls.length) {
+    urls = givenUrls;
+    windowCount = urls.length;
+    if (crawlMode === 'amigo') {
+      gameType = 'amigo';
+      regionClick = {
+        xMin: readPercentInput('fg2XMin', 1),
+        xMax: readPercentInput('fg2XMax', 100),
+        yMin: readPercentInput('fg2YMin', 20),
+        yMax: readPercentInput('fg2YMax', 80),
+        pickmeMode: readPickmeMode(),
+        pickmePoints: readPickmePointsFromUi(),
+        pickmeGrid: readPickmeGridFromUi(),
+        interval: Math.max(200, Math.round((Number(document.getElementById('fg2Interval')?.value) || 0.8) * 1000))
+      };
+    } else if (crawlMode === 'va') {
+      gameType = 'va';
+    }
+  } else if (crawlMode === 'amigo') {
     gameType = 'amigo';
     gameId = document.getElementById('amigoGameId')?.value || '';
     windowCount = Math.max(
@@ -1614,7 +1639,10 @@ async () => {
 
   log("开始抓取...");
   log(splitByWindow ? "已启用分窗口存储" : "未启用分窗口存储，所有窗口共用目录");
-  if (crawlMode === 'amigo') {
+  if (fromPage) {
+    const modeName = crawlMode === 'amigo' ? 'Amigo' : crawlMode === 'va' ? 'VA' : '普通';
+    log(`${modeName}模式：打开网页已获取的 ${urls.length} 条链接`);
+  } else if (crawlMode === 'amigo') {
     const g = amigoGameList.find(x => String(x.id) === String(gameId));
     if (urls.length) {
       log(`Amigo 模式：手动链接 ${urls.length} 个${gameId ? '，游戏 ' + gameId + (g ? ' — ' + g.label : '') : '（未选游戏，403 不换链）'}`);
@@ -1987,9 +2015,10 @@ async function applyLaunchJob() {
     radio.checked = true;
     radio.dispatchEvent(new Event('change'));
   }
-  const listId = mode === 'amigo' ? 'amigoUrlList' : mode === 'va' ? 'vaUrlList' : 'urlList';
   const urls = Array.isArray(job.urls) ? job.urls.map(u => String(u).trim()).filter(Boolean) : [];
+  const listId = mode === 'amigo' ? 'amigoUrlList' : mode === 'va' ? 'vaUrlList' : 'urlList';
   fillLaunchUrls(listId, urls);
+  window.__bkLaunchUrls = urls.length ? urls.slice() : null;
 
   let dir = String(job.dir || '').trim();
   if (!dir) {

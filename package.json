@@ -1,6 +1,6 @@
 {
   "name": "pg-node",
-  "version": "4.0.7",
+  "version": "4.0.8",
   "main": "main.js",
   "description": "PG Crawler Desktop Tool",
   "author": "BK",
