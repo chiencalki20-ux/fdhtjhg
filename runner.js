@@ -700,6 +700,32 @@ ipcMain.handle('capture-screenshots', async (e, { dir } = {}) => {
   }
 });
 
+ipcMain.handle('reload-all-windows', async () => {
+  const instances = global.crawlerInstances || [];
+  const pages = instances
+    .map(item => item && item.page)
+    .filter(page => page && !page.isClosed());
+  if (!pages.length) {
+    return { ok: false, message: '当前没有可刷新的窗口' };
+  }
+  const results = await Promise.all(pages.map(async page => {
+    try {
+      await page.reload({ waitUntil: 'domcontentloaded', timeout: 45000 });
+      return true;
+    } catch (err) {
+      console.error('reload window error:', err);
+      return false;
+    }
+  }));
+  const reloaded = results.filter(Boolean).length;
+  return {
+    ok: reloaded > 0,
+    reloaded,
+    failed: results.length - reloaded,
+    message: reloaded ? '' : '刷新失败'
+  };
+});
+
 // =========================
 // 一次性关闭所有窗口
 // =========================

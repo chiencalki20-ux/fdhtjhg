@@ -84,6 +84,12 @@ body {
 }
 
 .dir-row input { flex: 1; }
+.dir-row .row-label {
+  font-size: 12px;
+  color: #cbd5e1;
+  white-space: nowrap;
+}
+.dir-row button { flex-shrink: 0; white-space: nowrap; }
 .dir-row label {
   display: flex;
   align-items: center;
@@ -453,8 +459,15 @@ h3 { margin: 0 0 6px; font-size: 13px; font-weight: 700; }
       <button class="main-btn" id="captureShot" style="background:#4f46e5;">截图</button>
       <button class="main-btn" id="downloadResources" style="background:#0f766e;">下载资源</button>
       <span class="sep"></span>
+      <button class="main-btn" id="refreshWindows" style="background:#0ea5e9;">刷新窗口</button>
       <button class="main-btn stop-btn" id="closeAllWindow">关窗口</button>
     </div>
+  </div>
+
+  <div class="dir-row">
+    <span class="row-label">更新地址</span>
+    <input id="updateBaseUrl" placeholder="http://192.168.10.119:5889/" />
+    <button class="main-btn" id="appUpdate" style="background:#7c3aed;">一键更新</button>
   </div>
 
   <div class="dir-row">
@@ -1972,6 +1985,75 @@ document.getElementById('captureShot').onclick = async () => {
 // =========================
 // 关闭所有窗口
 // =========================
+const DEFAULT_UPDATE_BASE = 'http://192.168.10.119:5889/';
+const updateBaseInput = document.getElementById('updateBaseUrl');
+
+async function loadUpdateBase() {
+  try {
+    const settings = await ipcRenderer.invoke('get-bk-settings');
+    updateBaseInput.value = (settings && settings.updateBaseUrl) || DEFAULT_UPDATE_BASE;
+  } catch (e) {
+    updateBaseInput.value = DEFAULT_UPDATE_BASE;
+  }
+}
+
+updateBaseInput.addEventListener('change', () => {
+  ipcRenderer.invoke('save-bk-settings', {
+    updateBaseUrl: updateBaseInput.value.trim()
+  }).catch(() => {});
+});
+
+ipcRenderer.on('app-update-progress', (_e, info) => {
+  if (!info) return;
+  if (info.phase === 'start') {
+    log('开始下载 ' + info.fileName);
+    return;
+  }
+  if (info.phase !== 'download') return;
+  if (info.total > 0) {
+    const pct = Math.min(100, Math.floor(info.received * 100 / info.total));
+    setStatus(`更新下载 ${pct}%`, '#c4b5fd');
+  } else {
+    setStatus(`更新下载 ${(info.received / 1048576).toFixed(1)} MB`, '#c4b5fd');
+  }
+});
+
+document.getElementById('appUpdate').onclick = async () => {
+  const btn = document.getElementById('appUpdate');
+  const baseUrl = updateBaseInput.value.trim() || DEFAULT_UPDATE_BASE;
+  updateBaseInput.value = baseUrl;
+  try {
+    await ipcRenderer.invoke('save-bk-settings', { updateBaseUrl: baseUrl });
+  } catch (e) {}
+  btn.disabled = true;
+  setStatus('正在下载更新', '#c4b5fd');
+  const res = await ipcRenderer.invoke('app-update', { baseUrl });
+  if (!res || !res.ok) {
+    btn.disabled = false;
+    const message = (res && res.message) || '更新失败';
+    log('ERROR: ' + message);
+    setStatus('更新失败', '#ef4444');
+    return;
+  }
+  log(res.message || '下载完成，即将安装并退出');
+  setStatus('即将安装', '#22c55e');
+};
+
+document.getElementById('refreshWindows').onclick = async () => {
+  if (!window.confirm('确定要刷新所有打开中的窗口吗？')) return;
+  const res = await ipcRenderer.invoke('reload-all-windows');
+  if (!res || !res.ok) {
+    log((res && res.message) || '刷新失败');
+    setStatus('刷新失败', '#ef4444');
+    return;
+  }
+  const failed = res.failed ? `，${res.failed} 个失败` : '';
+  log(`已刷新 ${res.reloaded} 个窗口${failed}`);
+  setStatus('窗口已刷新', '#22c55e');
+};
+
+loadUpdateBase();
+
 document.getElementById('closeAllWindow').onclick = async () => {
   const confirmed = window.confirm('确定要关闭所有窗口吗？');
   if (!confirmed) {
